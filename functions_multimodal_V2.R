@@ -19,7 +19,7 @@
 #' @param accuracy
 #' @param verbose
 #'
-#' @returns A 4-level list containing:
+#' @returns A 6-level list containing:
 #' 1. Success flag either TRUE or FALSE for easy filtering, if true # of modes
 #' 2. Interpolated data between lower.limit and upper.limit for each mode;
 #' 3. Mode parameters and performance report;
@@ -51,33 +51,35 @@ multimodal.fitting <- function(data, log.path, frequency, max.iterations, max.mo
   if(missing(verbose)) verbose <- FALSE
 
   {
-    # Identify column classes of dataframe for usage later
-    col.classes <- lapply(data, class)
+    {
+      # Identify column classes of dataframe for usage later
+      col.classes <- lapply(data, class)
 
-    # Convert to data table for column indexing
-    data <- as.data.table(data)
+      # Convert to data table for column indexing
+      data <- as.data.table(data)
 
-    # Find columns containing the POSIX class
-    time.index = c(grep("POSIXt", col.classes))[1]
+      # Find columns containing the POSIX class
+      time.index = c(grep("POSIXt", col.classes))[1]
 
-    if (length(time.index) >= 1){
+      if (length(time.index) >= 1){
 
-      timestamp = unlist(data[1, time.index, with = F])
+        timestamp = unlist(data[1, time.index, with = F])
 
-      filename <- format(as.POSIXct(timestamp, origin = "1970-01-01"), "%Y%m%d%H%M%S")
-    } else {
-      filename <- "NA"
-    }
+        filename <- format(as.POSIXct(timestamp, origin = "1970-01-01"), "%Y%m%d%H%M%S")
+      } else {
+        filename <- "NA"
+      }
 
-    if (dir.exists(log.path)){
+      if (dir.exists(log.path)){
 
-      # Create a temporary file
-      tmp.file <- file.path(paste0(log.path, "/multimodal", filename, "_",  format(Sys.time(), "%Y%m%d%H%M%S"), ".log"))
-      LOG <- log_open(tmp.file, show_notes = F)
+        # Create a temporary file
+        tmp.file <- file.path(paste0(log.path, "/multimodal", filename, "_",  format(Sys.time(), "%Y%m%d%H%M%S"), ".log"))
+        LOG <- log_open(tmp.file, show_notes = F)
 
-    } else {
-      print("Required argument 'path' must be specified (ex. '/Users/MyName/Documents/'")
-      break
+      } else {
+        print("Required argument 'path' must be specified (ex. '/Users/MyName/Documents/'")
+        break
+      }
     }
 
     # Return objects -------------------------------------------------------------
@@ -181,6 +183,9 @@ multimodal.fitting <- function(data, log.path, frequency, max.iterations, max.mo
 
         # Split by group
         data.ls <- split(tmp.df, tmp.df$Group)
+
+        # Remove empty lists to prevent errors downstream
+        data.ls <- purrr::discard(data.ls, ~nrow(.) == 0)
       }
     }
 
@@ -190,6 +195,10 @@ multimodal.fitting <- function(data, log.path, frequency, max.iterations, max.mo
 
       # Used for logging
       date.time.c <- lubridate::as_datetime(as.numeric(first(z[, time.index, with = F])))
+      date.time.end.c <- lubridate::as_datetime(as.numeric(last(z[, time.index, with = F])))
+
+      # Number of observations per group
+      n.obs <- nrow(z)
 
       # Size bins --------------------------------------------------------------
       {
@@ -217,8 +226,7 @@ multimodal.fitting <- function(data, log.path, frequency, max.iterations, max.mo
         select.c <- bins.ix[1:(length(bins.ix) - 1)]
       }
 
-      # Number Density Matrix ----------------------------------------------------
-
+      # Number Density Matrix --------------------------------------------------
       {
         # Subset data and create a numeric matrix
         dNdlogDp.mat <- z[, select.c, with = F]
@@ -289,7 +297,7 @@ multimodal.fitting <- function(data, log.path, frequency, max.iterations, max.mo
         }
       }
 
-      # MODEL SETUP ----------------------------------------------------------------
+      # MODEL SETUP ------------------------------------------------------------
       {
         # Create temporary dataset used to initialize the fitting algorithm
         tmp.data = data.frame(Dp = as.numeric(names(dN)),
@@ -307,8 +315,7 @@ multimodal.fitting <- function(data, log.path, frequency, max.iterations, max.mo
         m = 1
       }
 
-      # Peak Identified Levenberg-Marquardt Nonlinear Least-Squares Algorithm ------
-
+      # Peak Identified Levenberg-Marquardt NLS Algorithm ----------------------
       {
         # Start loop
         while (FVU > 1 & i < max.iterations & length(purrr::compact(model.fitting)) < max.modes){
@@ -385,7 +392,7 @@ multimodal.fitting <- function(data, log.path, frequency, max.iterations, max.mo
                 peaks.df$N = sum(tmp.dNdlogDp*tmp.dlogDp)
               } else {
 
-                tmp.print <- paste0(date.time.c, ": Current Loop Iteration: ", i, " Negative Concentration!")
+                tmp.print <- paste0(date.time.c, ": Current Loop Iteration: ", i, ", Negative Concentration!")
 
                 if (verbose){
                   # Print to console
@@ -421,7 +428,7 @@ multimodal.fitting <- function(data, log.path, frequency, max.iterations, max.mo
               # If GSD fails, increase iteration counter and try the second peak
               if (is.nan(GSD)){
 
-                tmp.print <- paste0(date.time.c, ": Current Loop Iteration: ", i, " GSD Error!")
+                tmp.print <- paste0(date.time.c, ": Current Loop Iteration: ", i, ", GSD Error!")
 
                 if (verbose){
                   # Print to console
@@ -470,7 +477,7 @@ multimodal.fitting <- function(data, log.path, frequency, max.iterations, max.mo
             # Stop code from continuing if there are no ramps detected which means the dataset will be empty and continue to throw errors
             if (NLS.break) {
 
-              tmp.print <- paste0(date.time.c, ": Terminating loop ", i, " model fitting failure")
+              tmp.print <- paste0(date.time.c, ": Terminating loop ", i, ", model fitting failure")
 
               if (verbose){
                 # Print to console
@@ -494,7 +501,7 @@ multimodal.fitting <- function(data, log.path, frequency, max.iterations, max.mo
           tmp.xL <- round(tmp.predict$x, 2)
           tmp.xR <- round(tmp.data$Dp, 2)
 
-          index.match <- which(as.character(tmp.xL) %in% as.character(tmp.xR))
+          index.match <- which(tmp.xL %in% tmp.xR)
 
           predict.diameter = tmp.predict[index.match, 1]
           predict.dNdlogDp = tmp.predict[index.match, 2]
@@ -518,7 +525,7 @@ multimodal.fitting <- function(data, log.path, frequency, max.iterations, max.mo
 
             tmp.data$residual[which(tmp.data$Dp < peaks.df$Upper & tmp.data$Dp > peaks.df$Lower)] <- 0
 
-            tmp.print <- paste0(date.time.c, ": Peak estimation is 150% higher", i, " , resetting to zero and retrying")
+            tmp.print <- paste0(date.time.c, ": Peak estimation is 150% higher", i, ", resetting to zero and retrying")
 
             if (verbose){
               # Print to console
@@ -545,9 +552,9 @@ multimodal.fitting <- function(data, log.path, frequency, max.iterations, max.mo
 
             # Add model values to output list
             export.lm[[i]] <- NLS.MODEL
-          }
 
-          FVU = round((var(tmp.data$residual)/var(tmp.data$dNdlogDp))*100, 2)
+            FVU = round((var(tmp.data$residual)/var(tmp.data$dNdlogDp))*100, 2)
+          }
 
           tmp.print <- paste0(date.time.c, ": Current Loop Iteration: ", i, ", Remaining Variance: ", FVU, "%",
                               ", Number of Modes: ", nrow(rbindlist(purrr::compact(peak.fitting))))
@@ -569,7 +576,6 @@ multimodal.fitting <- function(data, log.path, frequency, max.iterations, max.mo
       }
 
       # Post-Processing --------------------------------------------------------
-
       {
         # Output list of identified peak data from loop
         {
@@ -627,7 +633,7 @@ multimodal.fitting <- function(data, log.path, frequency, max.iterations, max.mo
         }
       }
 
-      # Statistics ------------------------------------------------------------
+      # Statistics -------------------------------------------------------------
       {
 
         # Calculate various statistical measures
@@ -635,7 +641,7 @@ multimodal.fitting <- function(data, log.path, frequency, max.iterations, max.mo
         # Matching predictions to measurements
         {
           # Find the matched diameters so measurements to predicted binned diameters is correct
-          match.ix <- which(as.character(output$Dp) %in% as.character(tmp.data$Dp))
+          match.ix <- which(output$Dp %in% tmp.data$Dp)
 
           # Diameters
           Dp <- output$Dp[match.ix]
@@ -716,7 +722,7 @@ multimodal.fitting <- function(data, log.path, frequency, max.iterations, max.mo
         }
       }
 
-      # Plotting ------------------------------------------------------------
+      # Plotting ---------------------------------------------------------------
       {
         plot.df <- output %>%
           pivot_longer(
@@ -743,7 +749,7 @@ multimodal.fitting <- function(data, log.path, frequency, max.iterations, max.mo
 
         y.breaks = unique(c(pretty(export.df$`Predicted dNdlogDp`), pretty(export.df$`Actual dNdlogDp`)))
 
-        x.label.positions = log10(x.limits)
+        x.label.positions = round(log10(x.limits))
 
         breaks <- NULL
         labels <- NULL
@@ -770,17 +776,37 @@ multimodal.fitting <- function(data, log.path, frequency, max.iterations, max.mo
 
         labels.df$`Mode Label` <- str_replace(labels.df$`Mode Label`, "Mode ", "")
 
+        # Plot title
+        if (n.obs == 1 & any(c(is.na(frequency), is.null(frequency), is.nan(frequency)))){
+          plot.title = paste0(date.time.c)
+        } else {
+          plot.title = paste0(date.time.c, " - ", date.time.end.c)
+        }
+
+        text.labels <- plot.df %>%
+          group_by(Mode) %>%
+          arrange(desc(Concentration)) %>%
+          slice(1) %>%
+          ungroup()
+
+        text.labels <- text.labels %>%
+          filter(Mode != "Total") %>%
+          mutate(label = paste0("(", str_replace(Mode, "Mode ", ""), ")"))
+
+        # Plotting each panel seperately then using patchwork to join
         {
           top.gg <- ggplot(data = tmp.data, aes(x = Dp, y = dNdlogDp)) +
             geom_point(shape = 1) +
             geom_line(data = plot.df, aes(x = Diameter, y = Concentration, color = Mode), linewidth = 0.5) +
             geom_ribbon(data = error, aes(x = Dp, ymin = Min, ymax = Max), inherit.aes = F, fill = "gray75", alpha = 0.5) +
+            ggrepel::geom_text_repel(data = text.labels, aes(x = `Diameter`, y = `Concentration`, label = label),
+                                     nudge_x = 0.1, nudge_y = 0.1, box.padding = 0.5) +
             scale_x_log10(breaks = 10^breaks,
                           labels = labels,
                           limits = c(min(x.limits), max(x.limits))) +
             scale_y_continuous(breaks = y.breaks, limits = range(y.breaks)) +
-            labs(title = paste0("Concentration RMSE: ", stats.RMSE, " n/cc", ", NRMSE: ", round(NRMSE, 2)),
-                 subtitle = paste0("Pass: ", flag.control)) +
+            labs(title = plot.title,
+                 subtitle = paste0("Pass: ", flag.control, ", Concentration RMSE: ", stats.RMSE, " n/cc", ", NRMSE: ", round(NRMSE, 2), ", (n = ", n.obs, ")")) +
             ylab(expression("dN/dlog"[10]*"D"[p]*"  ["*"cm"^-3*"]")) +
             xlab(expression("D"[p]*"  [nm]")) +
             scale_color_manual(values = cm.palette) +
@@ -813,7 +839,7 @@ multimodal.fitting <- function(data, log.path, frequency, max.iterations, max.mo
             xlab(expression("D"[p])) +
             scale_color_manual(values = cm.palette) +
             theme(
-              plot.title = element_text(hjust = 0.5, size = 16),
+              plot.title = element_text(hjust = 0.5, size = 12),
               plot.subtitle = element_text(hjust = 0.5, size = 12),
               panel.background = element_rect(fill = "white"),
               panel.grid.major = element_line(colour = "grey80", linewidth = 0.1),
@@ -837,15 +863,16 @@ multimodal.fitting <- function(data, log.path, frequency, max.iterations, max.mo
             scale_color_manual(values = cm.palette) +
             labs(title = paste0("Pearson Correlation: ", stats.R2)) +
             theme(
-              plot.title = element_text(hjust = 0.5, size = 16),
+              plot.title = element_text(hjust = 0.5, size = 12),
               plot.subtitle = element_text(hjust = 0.5, size = 12),
+              plot.caption = element_text(hjust = 0, vjust = -5),
               panel.background = element_rect(fill = "white"),
               panel.grid.major = element_line(colour = "grey80", linewidth = 0.1),
               panel.grid.minor = element_line(colour = "grey80", linewidth = 0.01),
               panel.border = element_rect(colour = "black", fill = NA),
               axis.title.x = element_text(angle = 0, vjust = -1),
               axis.title.y = element_text(angle = 90, vjust = 2),
-              plot.margin = unit(c(1, 1, 0.1, 1), "cm"),
+              plot.margin = unit(c(1, 1, 1, 1), "cm"),
               legend.background = element_blank(),
               legend.box.background = element_blank(),
               legend.key = element_blank(),
@@ -861,10 +888,11 @@ multimodal.fitting <- function(data, log.path, frequency, max.iterations, max.mo
       # END  -----------------------------------------------------------------------
       export.ls <- list("pass" = flag.control, "plot" = export.gg, "data" = export.df, "predict" = export.ft, "fits" = export.lm, "evaluation" = export.pf)
     })
+
+    # Close log
+    log_close()
   }
 
-  # Close log
-  log_close()
   return(export.list)
 }
 

@@ -1,0 +1,118 @@
+---
+title: "Supplement"
+subtitle: "Technical Note: Curve fitting algorithm for multimodal particle size distributions – a theoretical basis"
+author: Christopher Rapp
+date: "2025-07-22"
+output:
+  bookdown::pdf_document2: default
+  bookdown::word_document2: default
+  bookdown::html_document2: default
+linkcolor: blue
+---
+
+Source code for SMPS read functions are housed here <https://github.com/christopher-rapp/scripts-multimodal.git>
+
+### Retrieve Read Functions
+
+```{r, echo = FALSE, message = FALSE}
+
+devtools::source_url("https://raw.githubusercontent.com/christopher-rapp/scripts-multimodal/refs/heads/main/functions_multimodal_V2.R")
+
+devtools::source_url("https://raw.githubusercontent.com/christopher-rapp/scripts-multimodal/refs/heads/main/readPSD_BMI.R")
+
+devtools::source_url("https://raw.githubusercontent.com/christopher-rapp/scripts-multimodal/refs/heads/main/readPSD_NAS.R")
+
+devtools::source_url("https://raw.githubusercontent.com/christopher-rapp/scripts-multimodal/refs/heads/main/readPSD_NC.R")
+
+devtools::source_url("https://raw.githubusercontent.com/christopher-rapp/scripts-multimodal/refs/heads/main/readPSD_TSI.R")
+
+```
+
+### Import Libraries
+
+```{r}
+
+library(stringr)
+library(data.table)
+library(tidyr)
+library(dplyr)
+library(lubridate)
+library(logr)
+library(ggplot2)
+library(purrr)
+library(patchwork)
+```
+
+### Brechtel Manufacturing Inc. (BMI) Data
+
+```{r, echo = FALSE}
+
+import.path = "~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/import/BMI/"
+
+BMI.data.ls <- readPSD_BMI(import.path, tz = "US/Eastern")
+
+head(BMI.data.ls[[54]])
+
+```
+
+### TSI Data
+
+```{r}
+
+import.path = "~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/import/TSI/"
+
+TSI.data.ls <- readPSD_TSI(import.path, tz = "US/Mountain")
+
+dataPSD.TSI <- rbindlist(TSI.data.ls)
+
+
+
+```
+
+### netCDF Data
+
+### NASA-AMES Data
+
+```{r}
+
+filepath = "~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/import/NASA-AMES/US9050R/"
+
+data <- readPSD_NAS(filepath)
+
+
+```
+
+```{r, fig.width = 8, fig.height = 8, fig.align = "center", echo=FALSE}
+
+{
+  start = Sys.time()
+
+  data.STATS <- multimodal.fitting(data,
+                                   log.path = "/Users/christopherrapp/Documents",
+                                   frequency = NULL,
+                                   max.iterations = 30,
+                                   max.modes = 10,
+                                   lower.limit = 8,
+                                   upper.limit = 1500,
+                                   verbose = F)
+
+  end = Sys.time()
+}
+
+end - start
+
+data.STATS$`2022-03-22`$plot
+
+```
+
+```{r}
+
+log.path = '/Users/christopherrapp/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log/'
+frequency = NULL
+max.iterations = 20
+max.modes = 6
+lower.limit = 10
+upper.limit = 1500
+accuracy = 0.05
+verbose = T
+```

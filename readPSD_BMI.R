@@ -1,24 +1,10 @@
+readPSD_BMI <- function(import.path, tz){
 
-
-
-
-readPSD_BMI <- function(import.path, export.data, export.plot, tz){
-
-  # ------------------------------------------------------------------------ #
+  # -------------------------------------------------------------------------- #
   ##### SECTION: File Wrangling #####
   #'
 
   {
-    # List all level0 csv files
-    dirs.bmi <- list.dirs(path = import.path,
-                          recursive = F,
-                          full.names = T)
-
-    dates.c <- unlist(str_extract_all(dirs.bmi, "\\d{6}", simplify = F))
-
-    # Retrieve date for exporting directories
-    dates.c <- str_remove_all(as.Date(dates.c, format = "%y%m%d"), '-')
-
     # List all level0 csv files
     files.bmi <- list.files(path = import.path,
                             recursive = T,
@@ -36,36 +22,8 @@ readPSD_BMI <- function(import.path, export.data, export.plot, tz){
   ##### SECTION: Create Export Structure #####
   #'
 
-  # Create a path to export plots with
-  export.data.path = paste0(export.data, dates.c, '/')
+  data.ls <- lapply(files.SEMS_CONC, function(x) {
 
-  # Create a path to export plots with
-  export.plot.path = paste0(export.plot, dates.c, '/')
-
-  for (i in 1:length(dates.c)){
-
-    # Check if export path exists
-    # If it does not, create it
-    if (!dir.exists(export.data.path[i])) {
-
-      # Create a dated directory to send plots to
-      dir.create(export.data.path[i], mode = "777")
-    }
-
-    # Check if export path exists
-    # If it does not, create it
-    if (!dir.exists(export.plot.path[i])) {
-
-      # Create a dated directory to send plots to
-      dir.create(export.plot.path[i], mode = "777")
-    }
-  }
-
-  # ------------------------------------------------------------------------ #
-  ##### SECTION: Create Export Structure #####
-  #'
-
-  output.ls <- lapply(files.SEMS_CONC, function(x) {
     # Use data.table's fread to read in data
     # Fastest method in reading CSV's and least memory consuming
     # fill MUST equal FALSE with SPIN files
@@ -84,7 +42,7 @@ readPSD_BMI <- function(import.path, export.data, export.plot, tz){
 
     filename.c <- str_extract(x, "(?<=CONC_)\\d{6}\\w{1}\\d{6}")
 
-    if (nrow(tmp.df) > 2){
+    if (nrow(tmp.df) >= 1){
 
       tmp.df <- tmp.df %>%
         mutate("Units" = "dNdlogDp")
@@ -105,9 +63,9 @@ readPSD_BMI <- function(import.path, export.data, export.plot, tz){
         tmp.df$`UTC Time` = with_tz(tmp.df$`Local Time`, tzone = "UTC")
       }
 
-      # Select numeric columns
-      bins.ix <- suppressWarnings(which(!is.na(as.numeric(colnames(tmp.df)))))
-      bins.nm <- sort(as.numeric(colnames(tmp.df)[bins.ix]))
+      # Retrieve median diameters and associated columns
+      bins.ix = str_which(colnames(tmp.df), "\\d+\\.\\d+")
+      bins.nm = as.numeric(colnames(tmp.df)[bins.ix])
 
       # Calculate the size range within the file
       tmp.df <- tmp.df %>%
@@ -124,5 +82,8 @@ readPSD_BMI <- function(import.path, export.data, export.plot, tz){
       select(all_of(time.index), everything())
   })
 
-  return(output.ls)
+  # Remove empty data.frames
+  data.ls <- purrr::discard(data.ls, ~nrow(.) == 0)
+
+  return(data.ls)
 }
