@@ -41,78 +41,170 @@ library(logr)
 library(ggplot2)
 library(purrr)
 library(patchwork)
+library(ncdf4)
 ```
 
 ### Brechtel Manufacturing Inc. (BMI) Data
 
-```{r, echo = FALSE}
+```{r}
 
-import.path = "~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/import/BMI/"
+# Path to data
+import.path = '/Users/christopherrapp/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/example/BMI/'
 
 BMI.data.ls <- readPSD_BMI(import.path, tz = "US/Eastern")
 
-head(BMI.data.ls[[54]])
+# Read functions export data as a list to account for multiple files in a directory
+dataPSD.BMI <- BMI.data.ls[[1]]
 
+head(dataPSD.BMI)
 ```
 
 ### TSI Data
 
+Use example data from Storm Peak Laboratory for a new particle formation event (NPF) on 2022-03-23 MDT.
+
 ```{r}
 
-import.path = "~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/import/TSI/"
+import.path = '/Users/christopherrapp/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/example/TSI/'
 
 TSI.data.ls <- readPSD_TSI(import.path, tz = "US/Mountain")
 
-dataPSD.TSI <- rbindlist(TSI.data.ls)
+# Read functions export data as a list to account for multiple files in a directory
+dataPSD.TSI <- TSI.data.ls[[1]]
 
-
-
+head(dataPSD.TSI)
 ```
 
 ### netCDF Data
+
+```{r}
+
+import.path = '/Users/christopherrapp/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/example/netCDF/'
+
+NC.data.ls <- readPSD_NC(import.path)
+
+# Read functions export data as a list to account for multiple files in a directory
+dataPSD.NC <- NC.data.ls[[1]]
+
+head(dataPSD.NC)
+```
 
 ### NASA-AMES Data
 
 ```{r}
 
-filepath = "~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/import/NASA-AMES/US9050R/"
+import.path = '/Users/christopherrapp/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/example/NASA-AMES/'
 
-data <- readPSD_NAS(filepath)
+NAS.data.ls <- readPSD_NAS(import.path)
 
+# Read functions export data as a list to account for multiple files in a directory
+dataPSD.NAS <- NAS.data.ls[[1]]
+
+head(dataPSD.NAS)
+
+```
+
+## Running multimodal
+
+```{r, fig.width = 8, fig.height = 8, fig.align = "center", echo=FALSE}
+
+# Frequency is null here because I already grouped data above
+tmp <- multimodal.fitting(dataPSD.BMI,
+          log.path = '~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log/',
+          frequency = NULL,
+          labeling = T,
+          max.iterations = 20,
+          max.modes = 6,
+          lower.limit = 10,
+          upper.limit = 1500,
+          NMRSE.threshold = 0.05,
+          FVU.threshold = 20,
+          verbose = F)
+
+tmp
 
 ```
 
 ```{r, fig.width = 8, fig.height = 8, fig.align = "center", echo=FALSE}
 
-{
-  start = Sys.time()
+# Frequency is null here because I already grouped data above
+tmp <- multimodal.fitting(dataPSD.TSI,
+          log.path = '~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log/',
+          frequency = NULL,
+          labeling = T,
+          max.iterations = 20,
+          max.modes = 6,
+          lower.limit = 10,
+          upper.limit = 1500,
+          NMRSE.threshold = 0.05,
+          FVU.threshold = 20,
+          verbose = T)
+```
 
-  data.STATS <- multimodal.fitting(data,
-                                   log.path = "/Users/christopherrapp/Documents",
-                                   frequency = NULL,
-                                   max.iterations = 30,
-                                   max.modes = 10,
-                                   lower.limit = 8,
-                                   upper.limit = 1500,
-                                   verbose = F)
+Notice the failure message? This is because the dataset begins for bin diameter 9.14. Now we can retry with adjusted limits.
 
-  end = Sys.time()
-}
+```{r, fig.width = 8, fig.height = 8, fig.align = "center", echo=FALSE}
 
-end - start
+# Frequency is null here because I already grouped data above
+tmp <- multimodal.fitting(dataPSD.TSI,
+          log.path = '~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log/',
+          frequency = NULL,
+          labeling = T,
+          max.iterations = 20,
+          max.modes = 6,
+          lower.limit = 8,
+          upper.limit = 1500,
+          NMRSE.threshold = 0.05,
+          FVU.threshold = 20,
+          verbose = T)
 
-data.STATS$`2022-03-22`$plot
+tmp
 
 ```
 
-```{r}
+For this file there is a NPF event, but currently the averaging across the entire day removes all temporal variation. We will instead select times between 07:00 and 15:00 and use an hourly frequency.
 
-log.path = '/Users/christopherrapp/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log/'
-frequency = NULL
-max.iterations = 20
-max.modes = 6
-lower.limit = 10
-upper.limit = 1500
-accuracy = 0.05
-verbose = T
+```{r, fig.width = 8, fig.height = 8, fig.align = "center", echo=FALSE}
+
+data <- subset(dataPSD.TSI, dataPSD.TSI$`Local Time` >= as.POSIXct("2022-03-23 7:00:00") &
+                 dataPSD.TSI$`Local Time` <= as.POSIXct("2022-03-23 15:00:00"))
+
+# Frequency is null here because I already grouped data above
+tmp <- multimodal.fitting(data,
+          log.path = '~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log/',
+          frequency = 60, # number of minutes
+          labeling = T,
+          max.iterations = 20,
+          max.modes = 10,
+          lower.limit = 8,
+          upper.limit = 1500,
+          NMRSE.threshold = 0.05,
+          FVU.threshold = 20,
+          verbose = F)
+
+map(tmp, 2)
+
+```
+
+Note - for features
+
+```{r, fig.width = 8, fig.height = 8, fig.align = "center", echo=FALSE}
+
+data <- subset(dataPSD.TSI, dataPSD.TSI$`Local Time` >= as.POSIXct("2022-03-23 10:00:00") &
+                 dataPSD.TSI$`Local Time` <= as.POSIXct("2022-03-23 10:15:00"))
+
+# Frequency is null here because I already grouped data above
+tmp <- multimodal.fitting(data,
+          log.path = '~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log/',
+          frequency = 1, # number of minutes
+          labeling = T,
+          max.iterations = 20,
+          max.modes = 10,
+          lower.limit = 8,
+          upper.limit = 1500,
+          NMRSE.threshold = 0.05,
+          FVU.threshold = 20,
+          verbose = F)
+
+map(tmp, 2)
 ```

@@ -120,5 +120,5 @@ readPSD_NAS <- function(filepath){
     return(data)
   })
 
-  data.df <- rbindlist(data.nas, fill = T)
+  return(data.nas)
 }

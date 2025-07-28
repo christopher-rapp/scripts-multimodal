@@ -39,15 +39,17 @@
 # data = rawSEMS.df
 
 
-multimodal.fitting <- function(data, log.path, frequency, max.iterations, max.modes, lower.limit, upper.limit, accuracy, verbose){
+multimodal.fitting <- function(data, log.path, labeling, frequency, max.iterations, max.modes, lower.limit, upper.limit, NMRSE.threshold, FVU.threshold, verbose){
 
   # Default arguments ----------------------------------------------------------
 
+  if(missing(labeling)) labeling <- T
   if(missing(max.iterations)) max.iterations <- 20
   if(missing(max.modes)) max.modes <- 5
   if(missing(lower.limit)) lower.limit <- 10
   if(missing(upper.limit)) upper.limit <- 1000
-  if(missing(accuracy)) accuracy <- 0.05
+  if(missing(NMRSE.threshold)) NMRSE.threshold <- 0.05
+  if(missing(FVU.threshold)) FVU.threshold <- 20
   if(missing(verbose)) verbose <- FALSE
 
   {
@@ -308,9 +310,11 @@ multimodal.fitting <- function(data, log.path, frequency, max.iterations, max.mo
         peak.fitting <- list()
         model.fitting <- list()
         export.lm <- list()
+        slopes <- list()
 
         # Initial parameters to initialize while loop
         FVU = 100
+        FVU.i = 100
         i = 1
         m = 1
       }
@@ -320,258 +324,278 @@ multimodal.fitting <- function(data, log.path, frequency, max.iterations, max.mo
         # Start loop
         while (FVU > 1 & i < max.iterations & length(purrr::compact(model.fitting)) < max.modes){
 
-          # First iteration
-          if (i == 1){
-            tmp.data$residual = tmp.data$dNdlogDp
-          }
-
-          # Find all peaks
           {
-            # Peak identification
-            peaks.df <- as.data.frame(pracma::findpeaks(tmp.data$residual,
-                                                        minpeakdistance = 5,
-                                                        sortstr = T
-            ))
-
-            # Use indices to match corresponding diameters
-            peaks.df$Max <- peaks.df$V1
-            peaks.df$Mode <- tmp.data$Dp[peaks.df$V2]
-            peaks.df$Lower <- tmp.data$Dp[peaks.df$V3]
-            peaks.df$Upper <- tmp.data$Dp[peaks.df$V4]
-            peaks.df$Width = peaks.df$V4 - peaks.df$V3
-
-            # Stop code from continuing if there are no ramps detected which means the dataset will be empty and continue to throw errors
-            if (m > nrow(peaks.df)) {
-
-              tmp.print <- paste0(date.time.c, ": Terminating loop, no remaining peaks")
-
-              if (verbose){
-                # Print to console
-                print(tmp.print)
-
-                # Print to log
-                log_print(tmp.print, console = FALSE)
-              } else {
-                # Print to log
-                log_print(tmp.print, console = FALSE)
-              }
-
-              break
+            # First iteration
+            if (i == 1){
+              tmp.data$residual = tmp.data$dNdlogDp
             }
 
-            peaks.df <- peaks.df[m, ]
-
-            # lower.side <- peaks.df$V3:peaks.df$V2
-            # upper.side <- peaks.df$V2:peaks.df$V4
-            #
-            # lower.slope = abs(mean(diff(tmp.data$residual[lower.side]) - diff(tmp.data$Dp[lower.side])))/peaks.df$Max
-            # upper.slope = abs(mean(diff(tmp.data$residual[upper.side]) - diff(tmp.data$Dp[upper.side])))/peaks.df$Max
-
-            range.c <- peaks.df$V3:peaks.df$V4
-
-            #plot(tmp.data$Dp[range.c], tmp.data$residual[range.c], log = "x", type = "b")
-          }
-
-          # Peak statistics
-          {
-            # Total Number Concentration
+            # Find all peaks
             {
-              # Find both dNdlogDp and dlogDp to convert to dN
-              tmp.dNdlogDp = tmp.data$residual[range.c]
-              tmp.dlogDp = tmp.data$dlogDp[range.c]
+              # Peak identification
+              peaks.df <- as.data.frame(pracma::findpeaks(tmp.data$residual,
+                                                          minpeakdistance = 5,
+                                                          sortstr = T
+              ))
 
-              # Find the original diameters corresponding to the peak range
-              tmp.Dp = tmp.data$Dp[range.c]
+              # Use indices to match corresponding diameters
+              peaks.df$Max <- peaks.df$V1
+              peaks.df$Mode <- tmp.data$Dp[peaks.df$V2]
+              peaks.df$Lower <- tmp.data$Dp[peaks.df$V3]
+              peaks.df$Upper <- tmp.data$Dp[peaks.df$V4]
+              peaks.df$Width = peaks.df$V4 - peaks.df$V3
 
-              # Add column for total number concentration (N)
-              peaks.df$N = sum(tmp.dNdlogDp*tmp.dlogDp)
+              # Stop code from continuing if there are no ramps detected which means the dataset will be empty and continue to throw errors
+              if (m > nrow(peaks.df)) {
 
-              if (sum(tmp.dNdlogDp*tmp.dlogDp) > 0){
+                tmp.print <- paste0(date.time.c, ": Terminating loop, no remaining peaks")
+
+                if (verbose){
+                  # Print to console
+                  print(tmp.print)
+
+                  # Print to log
+                  log_print(tmp.print, console = FALSE)
+                } else {
+                  # Print to log
+                  log_print(tmp.print, console = FALSE)
+                }
+
+                break
+              }
+
+              # Parameters used to select data
+              peaks.df <- peaks.df[m, ]
+              range.c <- peaks.df$V3:peaks.df$V4
+            }
+
+            # Peak statistics
+            {
+              # Total Number Concentration
+              {
+                # Find both dNdlogDp and dlogDp to convert to dN
+                tmp.dNdlogDp = tmp.data$residual[range.c]
+                tmp.dlogDp = tmp.data$dlogDp[range.c]
+
+                # Find the original diameters corresponding to the peak range
+                tmp.Dp = tmp.data$Dp[range.c]
 
                 # Add column for total number concentration (N)
                 peaks.df$N = sum(tmp.dNdlogDp*tmp.dlogDp)
-              } else {
 
-                tmp.print <- paste0(date.time.c, ": Current Loop Iteration: ", i, ", Negative Concentration!")
+                if (sum(tmp.dNdlogDp*tmp.dlogDp) > 0){
 
-                if (verbose){
-                  # Print to console
-                  print(tmp.print)
-
-                  # Print to log
-                  log_print(tmp.print, console = FALSE)
+                  # Add column for total number concentration (N)
+                  peaks.df$N = sum(tmp.dNdlogDp*tmp.dlogDp)
                 } else {
-                  # Print to log
-                  log_print(tmp.print, console = FALSE)
+
+                  tmp.print <- paste0(date.time.c, ": Current Loop Iteration: ", i, ", Negative Concentration!")
+
+                  if (verbose){
+                    # Print to console
+                    print(tmp.print)
+
+                    # Print to log
+                    log_print(tmp.print, console = FALSE)
+                  } else {
+                    # Print to log
+                    log_print(tmp.print, console = FALSE)
+                  }
+
+                  m = m + 1
+                  i = i + 1
+
+                  next
                 }
+              }
 
-                m = m + 1
-                i = i + 1
+              # GSD calculation
+              {
+                # Prevent negative values from appearing in GSD calculation
+                # This also prevents curves that are predicting negative concentrations
+                tmp.dNdlogDp[which(tmp.dNdlogDp < 0)] <- 0
+                tmp.dlogDp[which(tmp.dlogDp < 0)] <- 0
 
-                next
+                # Calculate GSD
+                # Warnings are suppressed for function output
+                GSD = suppressWarnings({
+                  10^(sqrt(sum(tmp.dNdlogDp*((log10(tmp.Dp) - log10(peaks.df$Mode))^2))/(peaks.df$N - 1)))
+                })
+
+                # If GSD fails, increase iteration counter and try the second peak
+                if (is.nan(GSD)){
+
+                  tmp.print <- paste0(date.time.c, ": Current Loop Iteration: ", i, ", GSD Error!")
+
+                  if (verbose){
+                    # Print to console
+                    print(tmp.print)
+
+                    # Print to log
+                    log_print(tmp.print, console = FALSE)
+                  } else {
+                    # Print to log
+                    log_print(tmp.print, console = FALSE)
+                  }
+
+                  m = m + 1
+                  i = i + 1
+
+                  next
+                } else {
+
+                  peaks.df$GSD = GSD
+                }
               }
             }
 
-            # GSD calculation
-            {
-              # Prevent negative values from appearing in GSD calculation
-              # This also prevents curves that are predicting negative concentrations
-              tmp.dNdlogDp[which(tmp.dNdlogDp < 0)] <- 0
-              tmp.dlogDp[which(tmp.dlogDp < 0)] <- 0
+            # Temporary dataframe for LM-NLS model
+            # This modifies the "view" NLS has when trying to curve fit
+            tmp <- data.frame(x = tmp.data$Dp[range.c], y = tmp.data$residual[range.c])
 
-              # Calculate GSD
-              # Warnings are suppressed for function output
-              GSD = suppressWarnings({
-                10^(sqrt(sum(tmp.dNdlogDp*((log10(tmp.Dp) - log10(peaks.df$Mode))^2))/(peaks.df$N - 1)))
-              })
-
-              # If GSD fails, increase iteration counter and try the second peak
-              if (is.nan(GSD)){
-
-                tmp.print <- paste0(date.time.c, ": Current Loop Iteration: ", i, ", GSD Error!")
-
-                if (verbose){
-                  # Print to console
-                  print(tmp.print)
-
-                  # Print to log
-                  log_print(tmp.print, console = FALSE)
-                } else {
-                  # Print to log
-                  log_print(tmp.print, console = FALSE)
-                }
-
-                m = m + 1
-                i = i + 1
-
-                next
-              } else {
-
-                peaks.df$GSD = GSD
-              }
-            }
-          }
-
-          # Temporary dataframe for LM-NLS model
-          # This modifies the "view" NLS has when trying to curve fit
-          tmp <- data.frame(x = tmp.data$Dp[range.c], y = tmp.data$residual[range.c])
-
-          # LM_NLS -----------------------------------------------------------------
-          # Try fitting an NLS model to the residuals (or original data if first iteration)
-          {
-            NLS.break <<- FALSE
-
+            # LM_NLS -----------------------------------------------------------------
             # Try fitting an NLS model to the residuals (or original data if first iteration)
-            tryCatch(expr = {
+            {
+              NLS.break <<- FALSE
 
-              NLS.MODEL <- suppressWarnings(minpack.lm::nlsLM(y ~ dNdlogDp.PSD(x, N, GSD, Dpg), data = tmp,
-                                                              start = list(N = peaks.df$N, GSD = peaks.df$GSD, Dpg = peaks.df$Mode),
-                                                              trace = F))
+              # Try fitting an NLS model to the residuals (or original data if first iteration)
+              tryCatch(expr = {
 
-            },
-            error = function(e){
-              NLS.break <<- TRUE
-            }
-            )
+                NLS.MODEL <- suppressWarnings(minpack.lm::nlsLM(y ~ dNdlogDp.PSD(x, N, GSD, Dpg), data = tmp,
+                                                                start = list(N = peaks.df$N, GSD = peaks.df$GSD, Dpg = peaks.df$Mode),
+                                                                trace = F))
 
-            # Stop code from continuing if there are no ramps detected which means the dataset will be empty and continue to throw errors
-            if (NLS.break) {
+              },
+              error = function(e){
+                NLS.break <<- TRUE
+              }
+              )
 
-              tmp.print <- paste0(date.time.c, ": Terminating loop ", i, ", model fitting failure")
+              # Stop code from continuing if there are no ramps detected which means the dataset will be empty and continue to throw errors
+              if (NLS.break) {
 
-              if (verbose){
-                # Print to console
-                print(tmp.print)
+                tmp.print <- paste0(date.time.c, ": Terminating loop ", i, ", model fitting failure")
 
-                # Print to log
-                log_print(tmp.print, console = FALSE)
-              } else {
-                # Print to log
-                log_print(tmp.print, console = FALSE)
+                if (verbose){
+                  # Print to console
+                  print(tmp.print)
+
+                  # Print to log
+                  log_print(tmp.print, console = FALSE)
+                } else {
+                  # Print to log
+                  log_print(tmp.print, console = FALSE)
+                }
+
+                break
               }
 
-              break
+              # Predict
+              tmp.predict = data.frame(x = seq(lower.limit, upper.limit, by = 0.01))
+              tmp.predict[[paste0("Mode ", i)]] <- predict(NLS.MODEL, newdata = tmp.predict)
             }
 
-            # Predict
-            tmp.predict = data.frame(x = seq(lower.limit, upper.limit, by = 0.01))
-            tmp.predict[[paste0("Mode ", i)]] <- predict(NLS.MODEL, newdata = tmp.predict)
-          }
+            tmp.xL <- round(tmp.predict$x, 2)
+            tmp.xR <- round(tmp.data$Dp, 2)
 
-          tmp.xL <- round(tmp.predict$x, 2)
-          tmp.xR <- round(tmp.data$Dp, 2)
+            index.match <- which(tmp.xL %in% tmp.xR)
 
-          index.match <- which(tmp.xL %in% tmp.xR)
+            predict.diameter = tmp.predict[index.match, 1]
+            predict.dNdlogDp = tmp.predict[index.match, 2]
 
-          predict.diameter = tmp.predict[index.match, 1]
-          predict.dNdlogDp = tmp.predict[index.match, 2]
+            if (length(predict.diameter) != nrow(tmp.data)){
 
-          if (length(predict.diameter) != nrow(tmp.data)){
+              tmp.print <- paste0(date.time.c, ": Error, please modify lower and upper limits to accommadate data set")
 
-            tmp.print <- paste0(date.time.c, ": Error, please modify lower and upper limits to accommadate data set")
-
-            # Print to console
-            print(tmp.print)
-
-            # Print to log
-            log_print(tmp.print, console = FALSE)
-
-            break
-          }
-
-          peak.height.ratio = max(tmp.predict[, 2])/peaks.df$Max
-
-          if (peak.height.ratio > 1.5){
-
-            tmp.data$residual[which(tmp.data$Dp < peaks.df$Upper & tmp.data$Dp > peaks.df$Lower)] <- 0
-
-            tmp.print <- paste0(date.time.c, ": Peak estimation is 150% higher", i, ", resetting to zero and retrying")
-
-            if (verbose){
               # Print to console
               print(tmp.print)
 
               # Print to log
               log_print(tmp.print, console = FALSE)
+
+              break
+            }
+
+            # Evaluation parameters
+            p.N <- summary(NLS.MODEL)$parameters[, 4][1]
+            p.GSD <- summary(NLS.MODEL)$parameters[, 4][2]
+            p.Dpg <- summary(NLS.MODEL)$parameters[, 4][3]
+
+            peak.height.ratio = max(tmp.predict[, 2])/peaks.df$Max
+
+            if (peak.height.ratio > 1.5){
+
+              tmp.data$residual[which(tmp.data$Dp < peaks.df$Upper & tmp.data$Dp > peaks.df$Lower)] <- 0
+
+              tmp.print <- paste0(date.time.c, ": Current Loop Iteration: ", i, ", Peak estimation is 150% higher than data, resetting to zero and retrying")
+
+              if (verbose){
+                # Print to console
+                print(tmp.print)
+
+                # Print to log
+                log_print(tmp.print, console = FALSE)
+              } else {
+                # Print to log
+                log_print(tmp.print, console = FALSE)
+              }
+            } else if (isTRUE(any(p.N >= 0.05, p.GSD >= 0.05, p.Dpg >= 0.05)) == T){
+
+              tmp.print <- paste0(date.time.c, ": Current Loop Iteration: ", i, ", LM-NLS significance greater than 0.05")
+
+              if (verbose){
+                # Print to console
+                print(tmp.print)
+
+                # Print to log
+                log_print(tmp.print, console = FALSE)
+              } else {
+                # Print to log
+                log_print(tmp.print, console = FALSE)
+              }
+
+              break
+            } else {
+
+              tmp.diff <- tmp.data$residual - predict.dNdlogDp
+
+              tmp.data$residual <- tmp.diff
+
+              # Add model values to output list
+              model.fitting[[i]] <- tmp.predict
+
+              # Add peak values to output list
+              peak.fitting[[i]] <- peaks.df
+
+              # Add model values to output list
+              export.lm[[i]] <- NLS.MODEL
+
+              FVU.i = round((var(tmp.data$residual)/var(tmp.data$dNdlogDp))*100, 2)
+            }
+
+            if (FVU.i < FVU){
+
+              FVU <- FVU.i
+            }
+
+            tmp.print <- paste0(date.time.c, ": Current Loop Iteration: ", i, ", Remaining Variance: ", FVU, "%",
+                                ", Number of Modes: ", nrow(rbindlist(purrr::compact(peak.fitting))))
+
+            # Move to next peak
+            i <- i + 1
+
+            if (verbose){
+
+              # Print to console
+              print(tmp.print)
+
+              # Print to log
+              log_print(tmp.print, console = F)
             } else {
               # Print to log
               log_print(tmp.print, console = FALSE)
             }
-
-          } else {
-
-            tmp.diff <- tmp.data$residual - predict.dNdlogDp
-
-            tmp.data$residual <- tmp.diff
-
-            # Add model values to output list
-            model.fitting[[i]] <- tmp.predict
-
-            # Add peak values to output list
-            peak.fitting[[i]] <- peaks.df
-
-            # Add model values to output list
-            export.lm[[i]] <- NLS.MODEL
-
-            FVU = round((var(tmp.data$residual)/var(tmp.data$dNdlogDp))*100, 2)
           }
-
-          tmp.print <- paste0(date.time.c, ": Current Loop Iteration: ", i, ", Remaining Variance: ", FVU, "%",
-                              ", Number of Modes: ", nrow(rbindlist(purrr::compact(peak.fitting))))
-
-          if (verbose){
-
-            # Print to console
-            print(tmp.print)
-
-            # Print to log
-            log_print(tmp.print, console = F)
-          } else {
-            # Print to log
-            log_print(tmp.print, console = FALSE)
-          }
-
-          i <- i + 1
         }
       }
 
@@ -581,6 +605,12 @@ multimodal.fitting <- function(data, log.path, frequency, max.iterations, max.mo
         {
           # Bind list output
           tmp.ls <- purrr::compact(export.lm)
+
+          if (length(tmp.ls) == 0){
+
+            export.ls <- list("pass" = flag.control, "plot" = NULL, "data" = export.df, "predict" = NULL, "fits" = NULL, "evaluation" = export.pf)
+            return(export.ls)
+          }
 
           tmp.df <- data.frame(matrix(nrow = length(tmp.ls), ncol = 11))
           for (s in 1:length(tmp.ls)){
@@ -713,11 +743,11 @@ multimodal.fitting <- function(data, log.path, frequency, max.iterations, max.mo
           print(paste0("Concentration RMSE: ", stats.RMSE, " n/cc"))
         }
 
-        if (FVU > 20){
+        if (FVU > FVU.threshold){
           flag.control <- FALSE
         }
 
-        if (NRMSE > accuracy){
+        if (NRMSE > NMRSE.threshold){
           flag.control <- FALSE
         }
       }
@@ -793,18 +823,23 @@ multimodal.fitting <- function(data, log.path, frequency, max.iterations, max.mo
           filter(Mode != "Total") %>%
           mutate(label = paste0("(", str_replace(Mode, "Mode ", ""), ")"))
 
+        if (labeling == FALSE){
+          text.labels <- text.labels %>%
+            mutate(label = "")
+        }
+
         # Plotting each panel seperately then using patchwork to join
         {
           top.gg <- ggplot(data = tmp.data, aes(x = Dp, y = dNdlogDp)) +
             geom_point(shape = 1) +
             geom_line(data = plot.df, aes(x = Diameter, y = Concentration, color = Mode), linewidth = 0.5) +
             geom_ribbon(data = error, aes(x = Dp, ymin = Min, ymax = Max), inherit.aes = F, fill = "gray75", alpha = 0.5) +
-            ggrepel::geom_text_repel(data = text.labels, aes(x = `Diameter`, y = `Concentration`, label = label),
-                                     nudge_x = 0.1, nudge_y = 0.1, box.padding = 0.5) +
             scale_x_log10(breaks = 10^breaks,
                           labels = labels,
                           limits = c(min(x.limits), max(x.limits))) +
             scale_y_continuous(breaks = y.breaks, limits = range(y.breaks)) +
+            ggrepel::geom_text_repel(data = text.labels, aes(x = `Diameter`, y = `Concentration`, label = label),
+                                     nudge_x = 0.1, nudge_y = y.limits[2]*0.1, box.padding = 1) +
             labs(title = plot.title,
                  subtitle = paste0("Pass: ", flag.control, ", Concentration RMSE: ", stats.RMSE, " n/cc", ", NRMSE: ", round(NRMSE, 2), ", (n = ", n.obs, ")")) +
             ylab(expression("dN/dlog"[10]*"D"[p]*"  ["*"cm"^-3*"]")) +
@@ -833,7 +868,7 @@ multimodal.fitting <- function(data, log.path, frequency, max.iterations, max.mo
             scale_x_log10(breaks = 10^breaks,
                           labels = labels,
                           limits = c(min(x.limits), max(x.limits))) +
-            scale_y_continuous(limits = y.limits) +
+            scale_y_continuous(limits = range(export.df$`Residual dNdlogDp`)) +
             labs(title = paste0("Fraction Variance Unexplained: ", FVU)) +
             ylab(expression("Residual (dN/dlog"[10]*"D"[p]*")")) +
             xlab(expression("D"[p])) +

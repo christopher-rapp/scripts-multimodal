@@ -1,5 +1,4 @@
 
-
 readPSD_NC <- function(filepath){
 
   # List files if multiple
@@ -59,13 +58,7 @@ readPSD_NC <- function(filepath){
     }
   })
 
-  # Bind all results of the list
-  data.df <- rbindlist(data.nc)
-
-  # Sort chronologically
-  data.df <- data.df[order(data.df$Time), ]
-
-  return(data.df)
+  return(data.nc)
 }
 
 
