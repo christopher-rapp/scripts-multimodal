@@ -12,11 +12,13 @@ linkcolor: blue
 
 Source code for SMPS read functions are housed here <https://github.com/christopher-rapp/scripts-multimodal.git>
 
-### Retrieve Read Functions
+# Setup
 
-```{r, echo = FALSE, message = FALSE}
+## Retrieve Read Functions
 
-devtools::source_url("https://raw.githubusercontent.com/christopher-rapp/scripts-multimodal/refs/heads/main/functions_multimodal_V2.R")
+```{r}
+
+devtools::source_url("https://raw.githubusercontent.com/christopher-rapp/scripts-multimodal/refs/heads/main/multimodal.R")
 
 devtools::source_url("https://raw.githubusercontent.com/christopher-rapp/scripts-multimodal/refs/heads/main/readPSD_BMI.R")
 
@@ -28,9 +30,15 @@ devtools::source_url("https://raw.githubusercontent.com/christopher-rapp/scripts
 
 ```
 
-### Import Libraries
+## Retrieve Example Data
 
 ```{r}
+
+```
+
+## Import Libraries
+
+```{r, echo=F, message=F}
 
 library(stringr)
 library(data.table)
@@ -44,14 +52,26 @@ library(patchwork)
 library(ncdf4)
 ```
 
-### Brechtel Manufacturing Inc. (BMI) Data
+## User Paths
+
+These must be changed if trying with your own data!
+
+```{r}
+log.path = '~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log/'
+
+import.path.BMI = '~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/example/BMI/'
+import.path.TSI = '~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/example/TSI/'
+import.path.NC = '~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/example/netCDF/'
+import.path.NAS = '~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/example/NASA-AMES/'
+```
+
+# Formatting Data
+
+## Brechtel Manufacturing Inc. (BMI) Data
 
 ```{r}
 
-# Path to data
-import.path = '/Users/christopherrapp/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/example/BMI/'
-
-BMI.data.ls <- readPSD_BMI(import.path, tz = "US/Eastern")
+BMI.data.ls <- readPSD_BMI(import.path.BMI, tz = "US/Eastern")
 
 # Read functions export data as a list to account for multiple files in a directory
 dataPSD.BMI <- BMI.data.ls[[1]]
@@ -59,15 +79,13 @@ dataPSD.BMI <- BMI.data.ls[[1]]
 head(dataPSD.BMI)
 ```
 
-### TSI Data
+## TSI Data
 
 Use example data from Storm Peak Laboratory for a new particle formation event (NPF) on 2022-03-23 MDT.
 
 ```{r}
 
-import.path = '/Users/christopherrapp/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/example/TSI/'
-
-TSI.data.ls <- readPSD_TSI(import.path, tz = "US/Mountain")
+TSI.data.ls <- readPSD_TSI(import.path.TSI, tz = "US/Mountain")
 
 # Read functions export data as a list to account for multiple files in a directory
 dataPSD.TSI <- TSI.data.ls[[1]]
@@ -75,13 +93,15 @@ dataPSD.TSI <- TSI.data.ls[[1]]
 head(dataPSD.TSI)
 ```
 
-### netCDF Data
+## netCDF Data
+
+Data were obtained from the Atmospheric Radiation Measurement (ARM) User Facility, a U.S. Department of Energy (DOE) Office of Science user facility managed by the Biological and Environmental Research Program.
+
+Kuang, C., Singh, A., Howie, J., Salwen, C., & Hayes, C. Scanning mobility particle sizer (AOSSMPS), 2016-11-15 to 2025-06-23, Southern Great Plains (SGP), Lamont, OK (Extended and Co-located with C1) (E13). Atmospheric Radiation Measurement (ARM) User Facility. [https://doi.org/10.5439/1476898](https://nam04.safelinks.protection.outlook.com/?url=https%3A%2F%2Fdoi.org%2F10.5439%2F1476898&data=05%7C02%7Crapp5%40purdue.edu%7C3169aa02ccec49c7f95308ddb347fdca%7C4130bd397c53419cb1e58758d6d63f21%7C0%7C0%7C638863843967247118%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=ALFii3068kvIqc5dG4sN68sjbu3pqHGaYbM90rr5aFM%3D&reserved=0)
 
 ```{r}
 
-import.path = '/Users/christopherrapp/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/example/netCDF/'
-
-NC.data.ls <- readPSD_NC(import.path)
+NC.data.ls <- readPSD_NC(import.path.NC)
 
 # Read functions export data as a list to account for multiple files in a directory
 dataPSD.NC <- NC.data.ls[[1]]
@@ -89,13 +109,15 @@ dataPSD.NC <- NC.data.ls[[1]]
 head(dataPSD.NC)
 ```
 
-### NASA-AMES Data
+## NASA-AMES Data
+
+Data obtained from <https://ebas-data.nilu.no/DataSets.aspx?stations=US9050R&InstrumentTypes=smps&fromDate=1970-01-01&toDate=2025-12-31>.
+
+The EBAS database has largely been funded by the UN-ECE CLRTAP (EMEP), AMAP and through NILU internal resources. Specific developments have been possible due to projects like EUSAAR (EU-FP5)(EBAS web interface), EBAS-Online (Norwegian Research Council INFRA) (upgrading of database platform) and HTAP (European Commission DG-ENV)(import and export routines to build a secondary repository in support of [**www.htap.org**](http://www.htap.org/)). A large number of specific projects have supported development of data and meta data reporting schemes in dialog with data providers (EU)(CREATE, ACTRIS and others). 
 
 ```{r}
 
-import.path = '/Users/christopherrapp/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/example/NASA-AMES/'
-
-NAS.data.ls <- readPSD_NAS(import.path)
+NAS.data.ls <- readPSD_NAS(import.path.NAS)
 
 # Read functions export data as a list to account for multiple files in a directory
 dataPSD.NAS <- NAS.data.ls[[1]]
@@ -104,41 +126,74 @@ head(dataPSD.NAS)
 
 ```
 
-## Running multimodal
+# Running multimodal
+
+Let's run multimodal on an example dataset using a Brechtel SEMS (Model 2002). Note the log path will need to be changed to whatever location you'd like it sent to!
+
+## Example 1 - Laboratory Data
+
+```{r}
+
+# Frequency is null here because I already grouped data above
+result <- multimodal.fitting(dataPSD.BMI,
+                             log.path = log.path,
+                             frequency = NULL,
+                             labeling = T,
+                             max.iterations = 20,
+                             max.modes = 6,
+                             lower.limit = 10,
+                             upper.limit = 1500,
+                             NMRSE.threshold = 0.05,
+                             FVU.threshold = 20,
+                             verbose = T)
+
+# As there is only 1 data file for this set, we will flatten the list
+
+result <- flatten(result)
+```
+
+## Outputs
+
+The first element of result is a pass flag i.e. T or F
+
+```{r}
+
+result$pass
+```
+
+The second is the plot which consists of three panels
 
 ```{r, fig.width = 8, fig.height = 8, fig.align = "center", echo=FALSE}
 
-# Frequency is null here because I already grouped data above
-tmp <- multimodal.fitting(dataPSD.BMI,
-          log.path = '~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log/',
-          frequency = NULL,
-          labeling = T,
-          max.iterations = 20,
-          max.modes = 6,
-          lower.limit = 10,
-          upper.limit = 1500,
-          NMRSE.threshold = 0.05,
-          FVU.threshold = 20,
-          verbose = F)
-
-tmp
-
+result[[2]]
 ```
+
+The remaining outputs are predicted data, the data used to plot curves, and evaluation parameters
+
+```{r}
+
+head(result[[3]])
+head(result[[4]])
+head(result[[5]])
+result[[6]]
+```
+
+## Example 2 - Storm Peak Laboratory
 
 ```{r, fig.width = 8, fig.height = 8, fig.align = "center", echo=FALSE}
 
 # Frequency is null here because I already grouped data above
 tmp <- multimodal.fitting(dataPSD.TSI,
-          log.path = '~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log/',
-          frequency = NULL,
-          labeling = T,
-          max.iterations = 20,
-          max.modes = 6,
-          lower.limit = 10,
-          upper.limit = 1500,
-          NMRSE.threshold = 0.05,
-          FVU.threshold = 20,
-          verbose = T)
+                          log.path = log.path,
+                          frequency = NULL,
+                          labeling = T,
+                          max.iterations = 20,
+                          max.modes = 6,
+                          lower.limit = 10,
+                          upper.limit = 1500,
+                          NMRSE.threshold = 0.05,
+                          FVU.threshold = 20,
+                          verbose = T)
 ```
 
 Notice the failure message? This is because the dataset begins for bin diameter 9.14. Now we can retry with adjusted limits.
@@ -147,18 +202,16 @@ Notice the failure message? This is because the dataset begins for bin diameter 
 
 # Frequency is null here because I already grouped data above
 tmp <- multimodal.fitting(dataPSD.TSI,
-          log.path = '~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log/',
-          frequency = NULL,
-          labeling = T,
-          max.iterations = 20,
-          max.modes = 6,
-          lower.limit = 8,
-          upper.limit = 1500,
-          NMRSE.threshold = 0.05,
-          FVU.threshold = 20,
-          verbose = T)
-
-tmp
+                          log.path = log.path,
+                          frequency = NULL,
+                          labeling = T,
+                          max.iterations = 20,
+                          max.modes = 6,
+                          lower.limit = 8,
+                          upper.limit = 1500,
+                          NMRSE.threshold = 0.05,
+                          FVU.threshold = 20,
+                          verbose = T)
 
 ```
 
@@ -171,40 +224,40 @@ data <- subset(dataPSD.TSI, dataPSD.TSI$`Local Time` >= as.POSIXct("2022-03-23 7
 
 # Frequency is null here because I already grouped data above
 tmp <- multimodal.fitting(data,
-          log.path = '~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log/',
-          frequency = 60, # number of minutes
-          labeling = T,
-          max.iterations = 20,
-          max.modes = 10,
-          lower.limit = 8,
-          upper.limit = 1500,
-          NMRSE.threshold = 0.05,
-          FVU.threshold = 20,
-          verbose = F)
+                          log.path = log.path,
+                          frequency = 60, # number of minutes
+                          labeling = T,
+                          max.iterations = 20,
+                          max.modes = 10,
+                          lower.limit = 8,
+                          upper.limit = 1500,
+                          NMRSE.threshold = 0.05,
+                          FVU.threshold = 20,
+                          verbose = F)
 
 map(tmp, 2)
 
 ```
 
-Note - for features
+Note - for higher resolution scans, the variation within the scan may be too high to capture. The following is an example.
 
 ```{r, fig.width = 8, fig.height = 8, fig.align = "center", echo=FALSE}
 
 data <- subset(dataPSD.TSI, dataPSD.TSI$`Local Time` >= as.POSIXct("2022-03-23 10:00:00") &
-                 dataPSD.TSI$`Local Time` <= as.POSIXct("2022-03-23 10:15:00"))
+                 dataPSD.TSI$`Local Time` <= as.POSIXct("2022-03-23 10:05:00"))
 
 # Frequency is null here because I already grouped data above
 tmp <- multimodal.fitting(data,
-          log.path = '~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log/',
-          frequency = 1, # number of minutes
-          labeling = T,
-          max.iterations = 20,
-          max.modes = 10,
-          lower.limit = 8,
-          upper.limit = 1500,
-          NMRSE.threshold = 0.05,
-          FVU.threshold = 20,
-          verbose = F)
+                          log.path = log.path,
+                          frequency = 5, # number of minutes
+                          labeling = T,
+                          max.iterations = 20,
+                          max.modes = 10,
+                          lower.limit = 8,
+                          upper.limit = 1500,
+                          NMRSE.threshold = 0.05,
+                          FVU.threshold = 20,
+                          verbose = F)
 
 map(tmp, 2)
 ```
