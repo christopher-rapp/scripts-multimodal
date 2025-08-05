@@ -16,7 +16,7 @@ Source code for SMPS read functions are housed here <https://github.com/christop
 
 ## Retrieve Read Functions
 
-```{r}
+```{r, echo=FALSE, message=FALSE}
 
 devtools::source_url("https://raw.githubusercontent.com/christopher-rapp/scripts-multimodal/refs/heads/main/multimodal.R")
 
@@ -136,7 +136,6 @@ Let's run multimodal on an example dataset using a Brechtel SEMS (Model 2002). N
 
 # Frequency is null here because I already grouped data above
 result <- multimodal.fitting(dataPSD.BMI,
-                             log.path = log.path,
                              frequency = NULL,
                              labeling = T,
                              max.iterations = 20,

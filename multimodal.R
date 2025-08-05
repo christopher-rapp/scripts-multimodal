@@ -19,11 +19,15 @@
 #' @param accuracy
 #' @param verbose
 #'
+#'
 #' @returns A 6-level list containing:
 #' 1. Success flag either TRUE or FALSE for easy filtering, if true # of modes
 #' 2. Interpolated data between lower.limit and upper.limit for each mode;
 #' 3. Mode parameters and performance report;
 #' 4. Plot list for visual check
+#'
+#' @import logr
+#'
 #' @export
 #'
 #' @examples
@@ -51,6 +55,7 @@ multimodal.fitting <- function(data, log.path, labeling, frequency, max.iteratio
   if(missing(NMRSE.threshold)) NMRSE.threshold <- 0.05
   if(missing(FVU.threshold)) FVU.threshold <- 20
   if(missing(verbose)) verbose <- FALSE
+  if(missing(log.path)) log.path <- file.path(paste0(tempdir(), "/multimodal", filename, "_",  format(Sys.time(), "%Y%m%d%H%M%S"), ".log"))
 
   {
     {
@@ -72,16 +77,7 @@ multimodal.fitting <- function(data, log.path, labeling, frequency, max.iteratio
         filename <- "NA"
       }
 
-      if (dir.exists(log.path)){
-
-        # Create a temporary file
-        tmp.file <- file.path(paste0(log.path, "/multimodal", filename, "_",  format(Sys.time(), "%Y%m%d%H%M%S"), ".log"))
-        LOG <- log_open(tmp.file, show_notes = F)
-
-      } else {
-        print("Required argument 'path' must be specified (ex. '/Users/MyName/Documents/'")
-        break
-      }
+      LOG <- logr::log_open(log.path, show_notes = F)
     }
 
     # Return objects -------------------------------------------------------------
