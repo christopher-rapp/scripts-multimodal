@@ -77,6 +77,9 @@ multimodal.fitting <- function(data, log.path, labeling, frequency, max.iteratio
         filename <- "NA"
       }
 
+      log.path <- file.path(paste0(log.path, "/multimodal", filename, "_",  format(Sys.time(), "%Y%m%d%H%M%S"), ".log"))
+      print(paste0("Log Path: ", log.path))
+
       LOG <- logr::log_open(log.path, show_notes = F)
     }
 
