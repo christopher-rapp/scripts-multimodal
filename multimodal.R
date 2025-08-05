@@ -55,7 +55,7 @@ multimodal.fitting <- function(data, log.path, labeling, frequency, max.iteratio
   if(missing(NMRSE.threshold)) NMRSE.threshold <- 0.05
   if(missing(FVU.threshold)) FVU.threshold <- 20
   if(missing(verbose)) verbose <- FALSE
-  if(missing(log.path)) log.path <- file.path(paste0(tempdir(), "/multimodal", filename, "_",  format(Sys.time(), "%Y%m%d%H%M%S"), ".log"))
+  if(missing(log.path)) log.path <- tempdir()
 
   {
     {
