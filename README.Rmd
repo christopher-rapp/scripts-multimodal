@@ -3,10 +3,9 @@ title: "Supplement"
 subtitle: "Technical Note: Curve fitting algorithm for multimodal particle size distributions – a theoretical basis"
 author: Christopher Rapp
 date: "2025-07-22"
-output:
-  bookdown::pdf_document2: default
-  bookdown::word_document2: default
-  bookdown::html_document2: default
+output: 
+  html_document:
+    keep_md: true
 linkcolor: blue
 ---
 
@@ -16,7 +15,7 @@ Source code for SMPS read functions are housed here <https://github.com/christop
 
 ## Retrieve Read Functions
 
-```{r, echo=FALSE, message=FALSE}
+```{r, echo=T, message=FALSE}
 
 devtools::source_url("https://raw.githubusercontent.com/christopher-rapp/scripts-multimodal/refs/heads/main/multimodal.R")
 
@@ -30,15 +29,9 @@ devtools::source_url("https://raw.githubusercontent.com/christopher-rapp/scripts
 
 ```
 
-## Retrieve Example Data
-
-```{r}
-
-```
-
 ## Import Libraries
 
-```{r, echo=F, message=F}
+```{r, message=F}
 
 library(stringr)
 library(data.table)
@@ -97,6 +90,8 @@ head(dataPSD.TSI)
 
 Data were obtained from the Atmospheric Radiation Measurement (ARM) User Facility, a U.S. Department of Energy (DOE) Office of Science user facility managed by the Biological and Environmental Research Program.
 
+SGP SMPS data were obtained from the Atmospheric Radiation Measurement (ARM) User Facility, a U.S. Department of Energy (DOE) Office of Science user facility managed by the Biological and Environmental Research Program.
+
 Kuang, C., Singh, A., Howie, J., Salwen, C., & Hayes, C. Scanning mobility particle sizer (AOSSMPS), 2016-11-15 to 2025-06-23, Southern Great Plains (SGP), Lamont, OK (Extended and Co-located with C1) (E13). Atmospheric Radiation Measurement (ARM) User Facility. [https://doi.org/10.5439/1476898](https://nam04.safelinks.protection.outlook.com/?url=https%3A%2F%2Fdoi.org%2F10.5439%2F1476898&data=05%7C02%7Crapp5%40purdue.edu%7C3169aa02ccec49c7f95308ddb347fdca%7C4130bd397c53419cb1e58758d6d63f21%7C0%7C0%7C638863843967247118%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=ALFii3068kvIqc5dG4sN68sjbu3pqHGaYbM90rr5aFM%3D&reserved=0)
 
 ```{r}
@@ -135,6 +130,7 @@ Let's run multimodal on an example dataset using a Brechtel SEMS (Model 2002). N
 ```{r}
 
 # Frequency is null here because I already grouped data above
+# I've also removed the argument for the log.path which will default to a temporary directory created by R which is deleted upon exiting an R session
 result <- multimodal.fitting(dataPSD.BMI,
                              frequency = NULL,
                              labeling = T,
@@ -182,6 +178,7 @@ result[[6]]
 ```{r, fig.width = 8, fig.height = 8, fig.align = "center", echo=FALSE}
 
 # Frequency is null here because I already grouped data above
+# Here we are sending the log to a specific location
 tmp <- multimodal.fitting(dataPSD.TSI,
                           log.path = log.path,
                           frequency = NULL,
