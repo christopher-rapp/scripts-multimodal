@@ -2,7 +2,7 @@
 title: "Supplement"
 subtitle: "Technical Note: Curve fitting algorithm for multimodal particle size distributions – a theoretical basis"
 author: Christopher Rapp
-date: "2025-07-22"
+date: "2025-08-08"
 output: 
   html_document:
     keep_md: true

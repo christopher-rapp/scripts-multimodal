@@ -2,7 +2,7 @@
 title: "Supplement"
 subtitle: "Technical Note: Curve fitting algorithm for multimodal particle size distributions – a theoretical basis"
 author: Christopher Rapp
-date: "2025-07-22"
+date: "2025-08-08"
 output: 
   html_document:
     keep_md: true
@@ -625,7 +625,7 @@ result <- multimodal.fitting(dataPSD.BMI,
 ```
 
 ```
-## [1] "Log Path: /var/folders/2j/rmf9p1l50wg904hz8qkpvc4m0000gn/T//Rtmp5X9R2i/multimodal20231031181523_20250808183851.log"
+## [1] "Log Path: /var/folders/2j/rmf9p1l50wg904hz8qkpvc4m0000gn/T//RtmpECsfQs/multimodal20231031181523_20250808184200.log"
 ## [1] "Current Dataset Time: 2023-10-31 22:15:23 UTC"
 ## [1] "Dataset sampling frequency is 2.4 min"
 ## [1] "2023-10-31 22:15:23: Current Loop Iteration: 1, Remaining Variance: 94.93%, Number of Modes: 1"
@@ -734,7 +734,7 @@ result[[6]]
 
 
 ```
-## [1] "Log Path: ~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log//multimodal20220323020341_20250808183853.log"
+## [1] "Log Path: ~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log//multimodal20220323020341_20250808184203.log"
 ## [1] "Current Dataset Time: 2022-03-23 06:03:41 UTC"
 ## [1] "Dataset sampling frequency is 5 min"
 ## [1] "2022-03-23 06:03:41: Error, please modify lower and upper limits to accommadate data set"
@@ -744,7 +744,7 @@ Notice the failure message? This is because the dataset begins for bin diameter 
 
 
 ```
-## [1] "Log Path: ~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log//multimodal20220323020341_20250808183854.log"
+## [1] "Log Path: ~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log//multimodal20220323020341_20250808184203.log"
 ## [1] "Current Dataset Time: 2022-03-23 06:03:41 UTC"
 ## [1] "Dataset sampling frequency is 5 min"
 ## [1] "2022-03-23 06:03:41: Current Loop Iteration: 1, Remaining Variance: 1.11%, Number of Modes: 1"
@@ -756,7 +756,7 @@ For this file there is a NPF event, but currently the averaging across the entir
 
 
 ```
-## [1] "Log Path: ~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log//multimodal20220323070340_20250808183854.log"
+## [1] "Log Path: ~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log//multimodal20220323070340_20250808184204.log"
 ```
 
 ```
@@ -825,7 +825,7 @@ Note - for higher resolution scans, the variation within the scan may be too hig
 
 
 ```
-## [1] "Log Path: ~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log//multimodal20220323100340_20250808183906.log"
+## [1] "Log Path: ~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log//multimodal20220323100340_20250808184216.log"
 ```
 
 ```
