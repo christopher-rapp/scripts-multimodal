@@ -1,7 +1,5 @@
 ---
-title: "Supplement"
-subtitle: 'Technical Note: Curve fitting algorithm for multimodal particle size distributions
-  – a theoretical basis'
+title: "Supplement of Technical Note: Curve fitting algorithm for multimodal particle size distributions – a theoretical basis"
 date: "2025-08-25"
 output:
   github_document:
@@ -11,7 +9,7 @@ linkcolor: blue
 
 ------------------------------------------------------------------------
 
-Christopher N. Rapp<sup>1</sup>, Sining Niu^2^, Yue Zhang^2^, A. Gannet Hallar^3^, Fred J. Brechtel^4^, and Daniel J. Cziczo^1^
+Christopher N. Rapp^1^, Sining Niu^2^, Yue Zhang^2^, A. Gannet Hallar^3^, Fred J. Brechtel^4^, and Daniel J. Cziczo^1^
 
 ^1^Department of Earth, Atmospheric, and Planetary Sciences, Purdue University, West Lafayette, Indiana, 47906-2051, USA
 
