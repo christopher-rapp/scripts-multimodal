@@ -1,5 +1,5 @@
-Supplement of Technical Note: Curve fitting algorithm for multimodal
-particle size distributions – a theoretical basis
+Technical Note: Curve fitting algorithm for multimodal particle size
+distributions – a theoretical basis
 ================
 2025-08-25
 
@@ -69,7 +69,7 @@ library(ncdf4)
 
 To download the example data visit
 
-<https://github.com/christopher-rapp/scripts-multimodal/tree/main/examples>
+<https://github.com/christopher-rapp/scripts-multimodal/tree/main/example_data>
 
 ``` r
 log.path = '~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log/'
@@ -82,6 +82,8 @@ import.path.NAS = '~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/examp
 
 # Formatting Data
 
+Raw view of data format is appended to the bottom of this document
+
 ## Brechtel Manufacturing Inc. (BMI) Data
 
 ``` r
@@ -89,7 +91,263 @@ BMI.data.ls <- readPSD_BMI(import.path.BMI, tz = "US/Eastern")
 
 # Read functions export data as a list to account for multiple files in a directory
 dataPSD.BMI <- BMI.data.ls[[1]]
+```
 
+## TSI Data
+
+Use example data from Storm Peak Laboratory for a new particle formation
+event (NPF) on 2022-03-23 MDT.
+
+``` r
+TSI.data.ls <- readPSD_TSI(import.path.TSI, tz = "US/Mountain")
+
+# Read functions export data as a list to account for multiple files in a directory
+dataPSD.TSI <- TSI.data.ls[[1]]
+```
+
+## netCDF Data
+
+Data were obtained from the Atmospheric Radiation Measurement (ARM) User
+Facility, a U.S. Department of Energy (DOE) Office of Science user
+facility managed by the Biological and Environmental Research Program.
+
+SGP SMPS data were obtained from the Atmospheric Radiation Measurement
+(ARM) User Facility, a U.S. Department of Energy (DOE) Office of Science
+user facility managed by the Biological and Environmental Research
+Program.
+
+Kuang, C., Singh, A., Howie, J., Salwen, C., & Hayes, C. Scanning
+mobility particle sizer (AOSSMPS), 2016-11-15 to 2025-06-23, Southern
+Great Plains (SGP), Lamont, OK (Extended and Co-located with C1) (E13).
+Atmospheric Radiation Measurement (ARM) User
+Facility. [https://doi.org/10.5439/1476898](https://nam04.safelinks.protection.outlook.com/?url=https%3A%2F%2Fdoi.org%2F10.5439%2F1476898&data=05%7C02%7Crapp5%40purdue.edu%7C3169aa02ccec49c7f95308ddb347fdca%7C4130bd397c53419cb1e58758d6d63f21%7C0%7C0%7C638863843967247118%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=ALFii3068kvIqc5dG4sN68sjbu3pqHGaYbM90rr5aFM%3D&reserved=0)
+
+``` r
+NC.data.ls <- readPSD_NC(import.path.NC)
+
+# Read functions export data as a list to account for multiple files in a directory
+dataPSD.NC <- NC.data.ls[[1]]
+```
+
+## NASA-AMES Data
+
+Data obtained from
+<https://ebas-data.nilu.no/DataSets.aspx?stations=US9050R&InstrumentTypes=smps&fromDate=1970-01-01&toDate=2025-12-31>.
+
+The EBAS database has largely been funded by the UN-ECE CLRTAP (EMEP),
+AMAP and through NILU internal resources. Specific developments have
+been possible due to projects like EUSAAR (EU-FP5)(EBAS web interface),
+EBAS-Online (Norwegian Research Council INFRA) (upgrading of database
+platform) and HTAP (European Commission DG-ENV)(import and export
+routines to build a secondary repository in support
+of [**www.htap.org**](http://www.htap.org/)). A large number of specific
+projects have supported development of data and meta data reporting
+schemes in dialog with data providers (EU)(CREATE, ACTRIS and others). 
+
+``` r
+NAS.data.ls <- readPSD_NAS(import.path.NAS)
+
+# Read functions export data as a list to account for multiple files in a directory
+dataPSD.NAS <- NAS.data.ls[[1]]
+```
+
+# Running multimodal
+
+Let’s run multimodal on an example dataset using a Brechtel SEMS (Model
+2002). Note the log path will need to be changed to whatever location
+you’d like it sent to!
+
+## Example 1 - Laboratory Data
+
+``` r
+# Frequency is null here because I already grouped data above
+# I've also removed the argument for the log.path which will default
+# to a temporary directory created by R which is deleted upon exiting an R session
+result <- multimodal.fitting(dataPSD.BMI,
+                             frequency = NULL,
+                             labeling = T,
+                             max.iterations = 20,
+                             max.modes = 6,
+                             lower.limit = 10,
+                             upper.limit = 1500,
+                             NMRSE.threshold = 0.05,
+                             FVU.threshold = 20,
+                             verbose = T)
+```
+
+    ## [1] "Log Path: /var/folders/2j/rmf9p1l50wg904hz8qkpvc4m0000gn/T//RtmpvQflp4/multimodal20231031181523_20250825124617.log"
+    ## [1] "Current Dataset Time: 2023-10-31 22:15:23 UTC"
+    ## [1] "Dataset sampling frequency is 2.4 min"
+    ## [1] "2023-10-31 22:15:23: Current Loop Iteration: 1, Remaining Variance: 94.93%, Number of Modes: 1"
+    ## [1] "2023-10-31 22:15:23: Current Loop Iteration: 2, Remaining Variance: 3.93%, Number of Modes: 2"
+    ## [1] "2023-10-31 22:15:23: Current Loop Iteration: 3, Remaining Variance: 2.57%, Number of Modes: 3"
+    ## [1] "2023-10-31 22:15:23: Current Loop Iteration: 4, Remaining Variance: 1.63%, Number of Modes: 4"
+    ## [1] "2023-10-31 22:15:23: Current Loop Iteration: 5, Remaining Variance: 1.34%, Number of Modes: 5"
+    ## [1] "2023-10-31 22:15:23: Current Loop Iteration: 6, Remaining Variance: 1.3%, Number of Modes: 6"
+    ## [1] "Concentration RMSE: 2132.57 n/cc"
+
+``` r
+# As there is only 1 data file for this set, we will flatten the list
+
+result <- flatten(result)
+```
+
+## Outputs
+
+The first element of result is a pass flag i.e. T or F
+
+``` r
+result$pass
+```
+
+    ## [1] TRUE
+
+The second is the plot which consists of three panels
+
+<img src="README_files/figure-gfm/unnamed-chunk-10-1.png" style="display: block; margin: auto;" />
+
+The remaining outputs are predicted data, the data used to plot curves,
+and evaluation parameters
+
+``` r
+head(result[[3]])
+```
+
+    ##      Dp Predicted dNdlogDp Predicted dN Actual dNdlogDp Actual dN
+    ## 1 10.16             453.91     6.301079        4952.512  68.74969
+    ## 2 10.49             529.09     7.117198        4985.419  67.06273
+    ## 3 10.82             612.31     8.465744        4903.316  67.79281
+    ## 4 11.17             709.75     9.777611        4740.169  65.30121
+    ## 5 11.53             820.21    11.251357        4507.124  61.82717
+    ## 6 11.90             944.94    12.899759        4250.884  58.03054
+    ##   Residual dNdlogDp Residual dN      Ratio
+    ## 1          4498.602    62.44861 0.09165247
+    ## 2          4456.329    59.94553 0.10612748
+    ## 3          4291.006    59.32707 0.12487672
+    ## 4          4030.419    55.52360 0.14973093
+    ## 5          3686.914    50.57581 0.18198080
+    ## 6          3305.944    45.13078 0.22229260
+
+``` r
+head(result[[4]])
+```
+
+    ##      Dp Mode 1 Mode 2 Mode 3 Mode 4 Mode 5 Mode 6 dNdlogDp
+    ## 1 10.00      0 420.26      0      0      0      0   420.26
+    ## 2 10.01      0 422.31      0      0      0      0   422.31
+    ## 3 10.02      0 424.37      0      0      0      0   424.37
+    ## 4 10.03      0 426.43      0      0      0      0   426.43
+    ## 5 10.04      0 428.50      0      0      0      0   428.50
+    ## 6 10.05      0 430.58      0      0      0      0   430.58
+
+``` r
+head(result[[5]])
+```
+
+    ##   Mode Label          N      GSD       Dpg       Max   Mode  Lower  Upper Width
+    ## 1     Mode 1  7709.7021 1.104493 317.61847 72801.737 311.03 249.85 451.56    13
+    ## 2     Mode 2 35219.1406 1.888153  71.61388 53335.797  69.18  13.51 105.61    62
+    ## 3     Mode 3  1299.9919 1.102360 150.90879 12544.712 147.69 126.94 172.59     8
+    ## 4     Mode 4   906.6612 1.069269 195.75567 12079.366 194.62 165.93 272.39    12
+    ## 5     Mode 5   715.3382 1.128914 499.31587  5631.458 497.83 430.34 830.76    13
+    ## 6     Mode 6   140.9658 1.042290 117.38486  2934.445 117.86  98.26 136.85     9
+    ##         BIC       RSS         TSS        R2 N T pval GSD T pval Dpg T pval
+    ## 1  276.9295 150254441  8174258916 0.9816186    5e-12    2.3e-22   2.16e-22
+    ## 2 1087.2011  88575112 19969539592 0.9955645    1e-65    1.1e-75   1.16e-73
+    ## 3  152.9817   4783910    93721539 0.9489561    8e-07    2.7e-12   1.13e-12
+    ## 4  262.9294 210120965   618259998 0.6601414    4e-03    3.1e-13   3.04e-13
+    ## 5  212.3369   1489699    53034863 0.9719109    2e-10    2.0e-19   5.82e-20
+    ## 6  179.0575  13928215    32875106 0.5763294    4e-02    2.1e-10   2.12e-10
+
+``` r
+result[[6]]
+```
+
+    ##      Pearson Correlation    RMSE      NRMSE dN RMSE   dN NRMSE Students T Test
+    ## [1,]              0.9939 2132.57 0.02935411   37.15 0.02613263          0.8524
+    ##      Chi-Squared
+    ## [1,]      0.2391
+
+## Example 2 - Storm Peak Laboratory
+
+    ## [1] "Log Path: ~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log//multimodal20220323020341_20250825124620.log"
+    ## [1] "Current Dataset Time: 2022-03-23 06:03:41 UTC"
+    ## [1] "Dataset sampling frequency is 5 min"
+    ## [1] "2022-03-23 06:03:41: Error, please modify lower and upper limits to accommadate data set"
+
+Notice the failure message? This is because the dataset begins for bin
+diameter 9.14. Now we can retry with adjusted limits.
+
+    ## [1] "Log Path: ~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log//multimodal20220323020341_20250825124620.log"
+    ## [1] "Current Dataset Time: 2022-03-23 06:03:41 UTC"
+    ## [1] "Dataset sampling frequency is 5 min"
+    ## [1] "2022-03-23 06:03:41: Current Loop Iteration: 1, Remaining Variance: 1.11%, Number of Modes: 1"
+    ## [1] "2022-03-23 06:03:41: Current Loop Iteration: 2, Remaining Variance: 0.82%, Number of Modes: 2"
+    ## [1] "Concentration RMSE: 354.11 n/cc"
+
+For this file there is a NPF event, but currently the averaging across
+the entire day removes all temporal variation. We will instead select
+times between 07:00 and 15:00 and use an hourly frequency.
+
+    ## [1] "Log Path: ~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log//multimodal20220323070340_20250825124620.log"
+
+    ## $`2022-03-23 11:00:00`
+
+<img src="README_files/figure-gfm/unnamed-chunk-14-1.png" style="display: block; margin: auto;" />
+
+    ## 
+    ## $`2022-03-23 12:00:00`
+
+<img src="README_files/figure-gfm/unnamed-chunk-14-2.png" style="display: block; margin: auto;" />
+
+    ## 
+    ## $`2022-03-23 13:00:00`
+
+<img src="README_files/figure-gfm/unnamed-chunk-14-3.png" style="display: block; margin: auto;" />
+
+    ## 
+    ## $`2022-03-23 14:00:00`
+
+<img src="README_files/figure-gfm/unnamed-chunk-14-4.png" style="display: block; margin: auto;" />
+
+    ## 
+    ## $`2022-03-23 15:00:00`
+
+<img src="README_files/figure-gfm/unnamed-chunk-14-5.png" style="display: block; margin: auto;" />
+
+    ## 
+    ## $`2022-03-23 16:00:00`
+
+<img src="README_files/figure-gfm/unnamed-chunk-14-6.png" style="display: block; margin: auto;" />
+
+    ## 
+    ## $`2022-03-23 17:00:00`
+
+<img src="README_files/figure-gfm/unnamed-chunk-14-7.png" style="display: block; margin: auto;" />
+
+    ## 
+    ## $`2022-03-23 18:00:00`
+
+<img src="README_files/figure-gfm/unnamed-chunk-14-8.png" style="display: block; margin: auto;" />
+
+    ## 
+    ## $`2022-03-23 19:00:00`
+
+<img src="README_files/figure-gfm/unnamed-chunk-14-9.png" style="display: block; margin: auto;" />
+
+Note - for higher resolution scans, the variation within the scan may be
+too high to capture. The following is an example.
+
+    ## [1] "Log Path: ~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log//multimodal20220323100340_20250825124632.log"
+
+    ## $`2022-03-23 14:05:00`
+
+    ## Warning: ggrepel: 1 unlabeled data points (too many overlaps). Consider
+    ## increasing max.overlaps
+
+<img src="README_files/figure-gfm/unnamed-chunk-15-1.png" style="display: block; margin: auto;" />
+
+``` r
 head(dataPSD.BMI)
 ```
 
@@ -230,17 +488,7 @@ head(dataPSD.BMI)
     ## 5:  18.44       0 dNdlogDp     866.07
     ## 6:   3.90       0 dNdlogDp     866.07
 
-## TSI Data
-
-Use example data from Storm Peak Laboratory for a new particle formation
-event (NPF) on 2022-03-23 MDT.
-
 ``` r
-TSI.data.ls <- readPSD_TSI(import.path.TSI, tz = "US/Mountain")
-
-# Read functions export data as a list to account for multiple files in a directory
-dataPSD.TSI <- TSI.data.ls[[1]]
-
 head(dataPSD.TSI)
 ```
 
@@ -397,29 +645,96 @@ head(dataPSD.TSI)
     ## 5:       2.02267           634.772      NA dNdlogDp     336.86
     ## 6:       2.02913           615.324      NA dNdlogDp     336.86
 
-## netCDF Data
+``` r
+head(dataPSD.NAS)
+```
 
-Data were obtained from the Atmospheric Radiation Measurement (ARM) User
-Facility, a U.S. Department of Energy (DOE) Office of Science user
-facility managed by the Biological and Environmental Research Program.
-
-SGP SMPS data were obtained from the Atmospheric Radiation Measurement
-(ARM) User Facility, a U.S. Department of Energy (DOE) Office of Science
-user facility managed by the Biological and Environmental Research
-Program.
-
-Kuang, C., Singh, A., Howie, J., Salwen, C., & Hayes, C. Scanning
-mobility particle sizer (AOSSMPS), 2016-11-15 to 2025-06-23, Southern
-Great Plains (SGP), Lamont, OK (Extended and Co-located with C1) (E13).
-Atmospheric Radiation Measurement (ARM) User
-Facility. [https://doi.org/10.5439/1476898](https://nam04.safelinks.protection.outlook.com/?url=https%3A%2F%2Fdoi.org%2F10.5439%2F1476898&data=05%7C02%7Crapp5%40purdue.edu%7C3169aa02ccec49c7f95308ddb347fdca%7C4130bd397c53419cb1e58758d6d63f21%7C0%7C0%7C638863843967247118%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=ALFii3068kvIqc5dG4sN68sjbu3pqHGaYbM90rr5aFM%3D&reserved=0)
+    ##             starttime             endtime pressure (hPa) temperature (K)   9.14
+    ## 1 2022-03-22 00:00:00 2022-03-22 01:00:00         646.33          299.72 474.24
+    ## 2 2022-03-22 01:00:00 2022-03-22 01:59:59         646.83          299.25  84.12
+    ## 3 2022-03-22 01:59:59 2022-03-22 03:00:00         646.58          298.76   0.00
+    ## 4 2022-03-22 03:00:00 2022-03-22 04:00:00         647.00          298.46   0.00
+    ## 5 2022-03-22 04:00:00 2022-03-22 04:59:59         646.83          298.20   0.00
+    ## 6 2022-03-22 04:59:59 2022-03-22 06:00:00         647.08          297.82   0.00
+    ##     9.47    9.82    10.2    10.6    10.9    11.3    11.8    12.2    12.6
+    ## 1 957.28 2867.13 3583.47 5114.35 6310.64 7191.34 7549.04 8580.99 8822.77
+    ## 2 298.20  916.45 1245.15 1485.14 2468.77 2897.71 3331.94 3617.07 4289.60
+    ## 3 120.74  189.00  529.25  605.65  796.45 1144.47 1584.89 1746.31 2045.49
+    ## 4   0.00   94.34  133.73   75.24  198.43  312.59  320.85  275.00  400.82
+    ## 5   0.00   31.36   25.14   40.92  168.13  238.74  299.34  346.10  351.32
+    ## 6   0.00    0.00   25.07  122.19  151.01  210.47  278.15  342.93  542.03
+    ##      13.1    13.6    14.1    14.6    15.1    15.7    16.3    16.8    17.5
+    ## 1 7952.76 8010.82 8162.86 7990.85 7451.82 7584.54 7593.25 7594.88 7001.90
+    ## 2 4424.07 4447.83 4597.11 4500.57 4620.33 4802.66 4865.29 4819.59 5048.73
+    ## 3 2123.54 2227.72 2054.91 2302.66 2327.27 2574.78 2489.49 2572.97 2945.02
+    ## 4  441.17  583.74  626.55  646.45  752.25  845.95  818.85  881.72 1049.40
+    ## 5  475.65  438.01  612.68  584.59  726.27  692.28  805.44  880.78  923.34
+    ## 6  468.29  766.36  774.15  798.08  919.40  972.99 1031.76 1092.83 1195.97
+    ##      18.1    18.8    19.5    20.2    20.9    21.7    22.5    23.3    24.1
+    ## 1 7125.60 7862.48 8124.80 8159.64 8364.12 8668.43 9002.40 9461.98 9622.86
+    ## 2 5513.54 5543.39 5945.24 6631.56 6552.99 7130.38 7386.48 7614.73 7806.07
+    ## 3 3080.90 3204.40 3573.71 3759.66 4030.89 4260.40 4499.01 4618.08 4902.01
+    ## 4 1049.61 1210.46 1189.02 1250.51 1195.23 1263.97 1262.21 1328.49 1260.05
+    ## 5  997.21 1153.40 1169.85 1226.61 1239.19 1358.63 1385.03 1447.41 1496.10
+    ## 6 1343.78 1458.61 1407.93 1530.73 1582.33 1734.30 1774.63 1756.64 1859.80
+    ##        25     25.9     26.9     27.9     28.9       30     31.1     32.2
+    ## 1 9946.65 10164.08 10489.97 10751.10 10815.08 10605.00 10928.09 10570.33
+    ## 2 8382.28  8610.70  8977.47  8990.91  9017.20  9184.89  9058.58  8908.22
+    ## 3 5232.13  5463.19  5566.40  5534.47  5708.35  5517.94  5529.11  5402.95
+    ## 4 1305.21  1373.60  1372.72  1341.94  1378.23  1410.03  1323.68  1346.79
+    ## 5 1459.50  1536.34  1602.51  1622.83  1670.06  1636.87  1661.84  1692.39
+    ## 6 1908.20  2064.13  2066.88  2153.87  2184.21  2167.84  2311.34  2311.05
+    ##       33.4    34.6    35.9    37.2    38.5      40    41.4    42.9    44.5
+    ## 1 10358.50 9783.52 9459.79 8558.29 7695.16 6851.74 5834.16 4942.83 4192.25
+    ## 2  8438.41 8037.41 7532.57 7088.88 6175.92 5608.94 4724.73 4034.35 3385.69
+    ## 3  4980.05 4867.38 4367.58 3831.24 3402.95 2974.85 2467.29 2100.91 1787.02
+    ## 4  1428.47 1320.27 1200.93 1190.69 1150.40 1097.74  982.27  910.10  800.29
+    ## 5  1676.72 1646.94 1566.61 1531.97 1458.84 1378.62 1266.97 1189.41 1029.79
+    ## 6  2285.59 2436.51 2321.06 2303.95 2236.54 2069.25 1980.24 1747.04 1582.02
+    ##      46.1    47.8    49.6    51.4    53.3    55.2   57.3   59.4   61.5   63.8
+    ## 1 3382.34 2716.13 2182.88 1793.04 1464.58 1209.39 998.06 848.05 734.84 592.79
+    ## 2 2784.91 2355.69 1772.08 1507.75 1253.15 1031.68 854.03 758.11 595.86 523.25
+    ## 3 1423.36 1228.62  971.92  828.83  676.32  537.27 482.39 431.73 326.24 292.78
+    ## 4  754.27  612.65  572.04  513.85  407.18  363.87 281.49 258.54 228.20 192.09
+    ## 5  900.15  769.38  664.89  586.86  527.89  403.64 344.26 297.05 259.85 248.29
+    ## 6 1388.00 1162.01 1037.57  901.58  715.39  633.97 520.10 452.40 379.16 336.34
+    ##     66.1   68.5     71   73.7   76.4   79.1     82   85.1   88.2   91.4   94.7
+    ## 1 512.72 445.46 378.32 318.03 290.38 284.55 252.50 260.34 251.02 273.03 214.79
+    ## 2 449.11 415.56 338.35 324.20 283.20 251.22 217.34 224.30 231.22 236.16 241.40
+    ## 3 247.59 220.45 185.24 181.72 189.66 174.19 179.05 163.21 191.91 181.62 226.92
+    ## 4 171.30 169.45 163.22 155.08 177.27 178.84 179.88 182.70 171.43 184.97 215.76
+    ## 5 217.41 197.53 161.24 159.57 178.57 168.03 160.96 162.04 184.80 183.87 181.94
+    ## 6 280.22 261.75 232.72 202.27 217.25 203.28 195.96 203.14 209.34 204.90 221.08
+    ##     98.2  101.8  105.5  109.4  113.4  117.6  121.9  126.3    131  135.8  140.7
+    ## 1 258.38 259.50 256.63 268.92 259.48 258.36 280.98 289.10 302.29 298.64 321.96
+    ## 2 244.99 241.06 253.38 269.55 286.54 308.75 283.43 329.53 308.09 333.24 350.34
+    ## 3 192.55 212.90 217.24 215.47 232.49 232.15 248.19 245.20 264.20 252.14 262.13
+    ## 4 204.90 207.46 223.79 208.16 201.93 246.67 232.52 236.46 265.16 293.46 278.25
+    ## 5 176.06 216.26 226.13 227.97 230.01 247.26 247.21 256.99 296.23 264.36 287.18
+    ## 6 244.08 234.17 265.16 264.20 260.05 271.70 287.46 316.44 309.72 320.14 308.20
+    ##    145.9  151.2  156.8  162.5  168.5  174.7  181.1  187.7  194.6  201.7  209.1
+    ## 1 335.77 353.06 328.67 362.97 360.43 363.98 350.93 346.04 332.69 320.46 298.03
+    ## 2 329.74 352.83 367.66 350.14 357.34 364.43 327.49 334.80 338.99 293.30 288.43
+    ## 3 290.72 276.36 318.40 294.14 301.60 310.36 297.91 285.13 275.97 266.37 233.51
+    ## 4 281.34 291.47 291.63 275.51 286.84 307.70 264.72 247.35 218.87 204.69 159.03
+    ## 5 273.42 293.82 296.25 292.59 307.69 297.63 286.49 273.43 247.65 197.44 170.20
+    ## 6 311.86 322.37 339.79 318.80 334.50 342.54 300.79 297.08 250.80 249.10 211.09
+    ##    216.7  224.7  232.9  241.4  250.3 259.5   269 278.8 289 299.6 310.6
+    ## 1 261.44 243.50 190.16 151.17 123.31 92.10 72.33     0   0     0     0
+    ## 2 249.12 208.33 170.19 147.77 115.52 91.64 74.70     0   0     0     0
+    ## 3 210.80 169.81 144.35 118.50  88.52 80.92 59.73     0   0     0     0
+    ## 4 143.56 110.82  90.40  78.33  53.16 38.25 30.68     0   0     0     0
+    ## 5 150.52 120.76 101.64  68.88  58.16 44.93 36.39     0   0     0     0
+    ## 6 168.26 141.73 117.16  85.99  76.30 55.52 42.99     0   0     0     0
+    ##   numflag, no unit
+    ## 1                0
+    ## 2                0
+    ## 3                0
+    ## 4                0
+    ## 5                0
+    ## 6                0
 
 ``` r
-NC.data.ls <- readPSD_NC(import.path.NC)
-
-# Read functions export data as a list to account for multiple files in a directory
-dataPSD.NC <- NC.data.ls[[1]]
-
 head(dataPSD.NC)
 ```
 
@@ -521,307 +836,3 @@ head(dataPSD.NC)
     ## 4 38.122 19.466
     ## 5 34.038 11.587
     ## 6 41.942 23.364
-
-## NASA-AMES Data
-
-Data obtained from
-<https://ebas-data.nilu.no/DataSets.aspx?stations=US9050R&InstrumentTypes=smps&fromDate=1970-01-01&toDate=2025-12-31>.
-
-The EBAS database has largely been funded by the UN-ECE CLRTAP (EMEP),
-AMAP and through NILU internal resources. Specific developments have
-been possible due to projects like EUSAAR (EU-FP5)(EBAS web interface),
-EBAS-Online (Norwegian Research Council INFRA) (upgrading of database
-platform) and HTAP (European Commission DG-ENV)(import and export
-routines to build a secondary repository in support
-of [**www.htap.org**](http://www.htap.org/)). A large number of specific
-projects have supported development of data and meta data reporting
-schemes in dialog with data providers (EU)(CREATE, ACTRIS and others). 
-
-``` r
-NAS.data.ls <- readPSD_NAS(import.path.NAS)
-
-# Read functions export data as a list to account for multiple files in a directory
-dataPSD.NAS <- NAS.data.ls[[1]]
-
-head(dataPSD.NAS)
-```
-
-    ##             starttime             endtime pressure (hPa) temperature (K)   9.14
-    ## 1 2022-03-22 00:00:00 2022-03-22 01:00:00         646.33          299.72 474.24
-    ## 2 2022-03-22 01:00:00 2022-03-22 01:59:59         646.83          299.25  84.12
-    ## 3 2022-03-22 01:59:59 2022-03-22 03:00:00         646.58          298.76   0.00
-    ## 4 2022-03-22 03:00:00 2022-03-22 04:00:00         647.00          298.46   0.00
-    ## 5 2022-03-22 04:00:00 2022-03-22 04:59:59         646.83          298.20   0.00
-    ## 6 2022-03-22 04:59:59 2022-03-22 06:00:00         647.08          297.82   0.00
-    ##     9.47    9.82    10.2    10.6    10.9    11.3    11.8    12.2    12.6
-    ## 1 957.28 2867.13 3583.47 5114.35 6310.64 7191.34 7549.04 8580.99 8822.77
-    ## 2 298.20  916.45 1245.15 1485.14 2468.77 2897.71 3331.94 3617.07 4289.60
-    ## 3 120.74  189.00  529.25  605.65  796.45 1144.47 1584.89 1746.31 2045.49
-    ## 4   0.00   94.34  133.73   75.24  198.43  312.59  320.85  275.00  400.82
-    ## 5   0.00   31.36   25.14   40.92  168.13  238.74  299.34  346.10  351.32
-    ## 6   0.00    0.00   25.07  122.19  151.01  210.47  278.15  342.93  542.03
-    ##      13.1    13.6    14.1    14.6    15.1    15.7    16.3    16.8    17.5
-    ## 1 7952.76 8010.82 8162.86 7990.85 7451.82 7584.54 7593.25 7594.88 7001.90
-    ## 2 4424.07 4447.83 4597.11 4500.57 4620.33 4802.66 4865.29 4819.59 5048.73
-    ## 3 2123.54 2227.72 2054.91 2302.66 2327.27 2574.78 2489.49 2572.97 2945.02
-    ## 4  441.17  583.74  626.55  646.45  752.25  845.95  818.85  881.72 1049.40
-    ## 5  475.65  438.01  612.68  584.59  726.27  692.28  805.44  880.78  923.34
-    ## 6  468.29  766.36  774.15  798.08  919.40  972.99 1031.76 1092.83 1195.97
-    ##      18.1    18.8    19.5    20.2    20.9    21.7    22.5    23.3    24.1
-    ## 1 7125.60 7862.48 8124.80 8159.64 8364.12 8668.43 9002.40 9461.98 9622.86
-    ## 2 5513.54 5543.39 5945.24 6631.56 6552.99 7130.38 7386.48 7614.73 7806.07
-    ## 3 3080.90 3204.40 3573.71 3759.66 4030.89 4260.40 4499.01 4618.08 4902.01
-    ## 4 1049.61 1210.46 1189.02 1250.51 1195.23 1263.97 1262.21 1328.49 1260.05
-    ## 5  997.21 1153.40 1169.85 1226.61 1239.19 1358.63 1385.03 1447.41 1496.10
-    ## 6 1343.78 1458.61 1407.93 1530.73 1582.33 1734.30 1774.63 1756.64 1859.80
-    ##        25     25.9     26.9     27.9     28.9       30     31.1     32.2
-    ## 1 9946.65 10164.08 10489.97 10751.10 10815.08 10605.00 10928.09 10570.33
-    ## 2 8382.28  8610.70  8977.47  8990.91  9017.20  9184.89  9058.58  8908.22
-    ## 3 5232.13  5463.19  5566.40  5534.47  5708.35  5517.94  5529.11  5402.95
-    ## 4 1305.21  1373.60  1372.72  1341.94  1378.23  1410.03  1323.68  1346.79
-    ## 5 1459.50  1536.34  1602.51  1622.83  1670.06  1636.87  1661.84  1692.39
-    ## 6 1908.20  2064.13  2066.88  2153.87  2184.21  2167.84  2311.34  2311.05
-    ##       33.4    34.6    35.9    37.2    38.5      40    41.4    42.9    44.5
-    ## 1 10358.50 9783.52 9459.79 8558.29 7695.16 6851.74 5834.16 4942.83 4192.25
-    ## 2  8438.41 8037.41 7532.57 7088.88 6175.92 5608.94 4724.73 4034.35 3385.69
-    ## 3  4980.05 4867.38 4367.58 3831.24 3402.95 2974.85 2467.29 2100.91 1787.02
-    ## 4  1428.47 1320.27 1200.93 1190.69 1150.40 1097.74  982.27  910.10  800.29
-    ## 5  1676.72 1646.94 1566.61 1531.97 1458.84 1378.62 1266.97 1189.41 1029.79
-    ## 6  2285.59 2436.51 2321.06 2303.95 2236.54 2069.25 1980.24 1747.04 1582.02
-    ##      46.1    47.8    49.6    51.4    53.3    55.2   57.3   59.4   61.5   63.8
-    ## 1 3382.34 2716.13 2182.88 1793.04 1464.58 1209.39 998.06 848.05 734.84 592.79
-    ## 2 2784.91 2355.69 1772.08 1507.75 1253.15 1031.68 854.03 758.11 595.86 523.25
-    ## 3 1423.36 1228.62  971.92  828.83  676.32  537.27 482.39 431.73 326.24 292.78
-    ## 4  754.27  612.65  572.04  513.85  407.18  363.87 281.49 258.54 228.20 192.09
-    ## 5  900.15  769.38  664.89  586.86  527.89  403.64 344.26 297.05 259.85 248.29
-    ## 6 1388.00 1162.01 1037.57  901.58  715.39  633.97 520.10 452.40 379.16 336.34
-    ##     66.1   68.5     71   73.7   76.4   79.1     82   85.1   88.2   91.4   94.7
-    ## 1 512.72 445.46 378.32 318.03 290.38 284.55 252.50 260.34 251.02 273.03 214.79
-    ## 2 449.11 415.56 338.35 324.20 283.20 251.22 217.34 224.30 231.22 236.16 241.40
-    ## 3 247.59 220.45 185.24 181.72 189.66 174.19 179.05 163.21 191.91 181.62 226.92
-    ## 4 171.30 169.45 163.22 155.08 177.27 178.84 179.88 182.70 171.43 184.97 215.76
-    ## 5 217.41 197.53 161.24 159.57 178.57 168.03 160.96 162.04 184.80 183.87 181.94
-    ## 6 280.22 261.75 232.72 202.27 217.25 203.28 195.96 203.14 209.34 204.90 221.08
-    ##     98.2  101.8  105.5  109.4  113.4  117.6  121.9  126.3    131  135.8  140.7
-    ## 1 258.38 259.50 256.63 268.92 259.48 258.36 280.98 289.10 302.29 298.64 321.96
-    ## 2 244.99 241.06 253.38 269.55 286.54 308.75 283.43 329.53 308.09 333.24 350.34
-    ## 3 192.55 212.90 217.24 215.47 232.49 232.15 248.19 245.20 264.20 252.14 262.13
-    ## 4 204.90 207.46 223.79 208.16 201.93 246.67 232.52 236.46 265.16 293.46 278.25
-    ## 5 176.06 216.26 226.13 227.97 230.01 247.26 247.21 256.99 296.23 264.36 287.18
-    ## 6 244.08 234.17 265.16 264.20 260.05 271.70 287.46 316.44 309.72 320.14 308.20
-    ##    145.9  151.2  156.8  162.5  168.5  174.7  181.1  187.7  194.6  201.7  209.1
-    ## 1 335.77 353.06 328.67 362.97 360.43 363.98 350.93 346.04 332.69 320.46 298.03
-    ## 2 329.74 352.83 367.66 350.14 357.34 364.43 327.49 334.80 338.99 293.30 288.43
-    ## 3 290.72 276.36 318.40 294.14 301.60 310.36 297.91 285.13 275.97 266.37 233.51
-    ## 4 281.34 291.47 291.63 275.51 286.84 307.70 264.72 247.35 218.87 204.69 159.03
-    ## 5 273.42 293.82 296.25 292.59 307.69 297.63 286.49 273.43 247.65 197.44 170.20
-    ## 6 311.86 322.37 339.79 318.80 334.50 342.54 300.79 297.08 250.80 249.10 211.09
-    ##    216.7  224.7  232.9  241.4  250.3 259.5   269 278.8 289 299.6 310.6
-    ## 1 261.44 243.50 190.16 151.17 123.31 92.10 72.33     0   0     0     0
-    ## 2 249.12 208.33 170.19 147.77 115.52 91.64 74.70     0   0     0     0
-    ## 3 210.80 169.81 144.35 118.50  88.52 80.92 59.73     0   0     0     0
-    ## 4 143.56 110.82  90.40  78.33  53.16 38.25 30.68     0   0     0     0
-    ## 5 150.52 120.76 101.64  68.88  58.16 44.93 36.39     0   0     0     0
-    ## 6 168.26 141.73 117.16  85.99  76.30 55.52 42.99     0   0     0     0
-    ##   numflag, no unit
-    ## 1                0
-    ## 2                0
-    ## 3                0
-    ## 4                0
-    ## 5                0
-    ## 6                0
-
-# Running multimodal
-
-Let’s run multimodal on an example dataset using a Brechtel SEMS (Model
-2002). Note the log path will need to be changed to whatever location
-you’d like it sent to!
-
-## Example 1 - Laboratory Data
-
-``` r
-# Frequency is null here because I already grouped data above
-# I've also removed the argument for the log.path which will default to a temporary directory created by R which is deleted upon exiting an R session
-result <- multimodal.fitting(dataPSD.BMI,
-                             frequency = NULL,
-                             labeling = T,
-                             max.iterations = 20,
-                             max.modes = 6,
-                             lower.limit = 10,
-                             upper.limit = 1500,
-                             NMRSE.threshold = 0.05,
-                             FVU.threshold = 20,
-                             verbose = T)
-```
-
-    ## [1] "Log Path: /var/folders/2j/rmf9p1l50wg904hz8qkpvc4m0000gn/T//RtmpiLjnCL/multimodal20231031181523_20250825123739.log"
-    ## [1] "Current Dataset Time: 2023-10-31 22:15:23 UTC"
-    ## [1] "Dataset sampling frequency is 2.4 min"
-    ## [1] "2023-10-31 22:15:23: Current Loop Iteration: 1, Remaining Variance: 94.93%, Number of Modes: 1"
-    ## [1] "2023-10-31 22:15:23: Current Loop Iteration: 2, Remaining Variance: 3.93%, Number of Modes: 2"
-    ## [1] "2023-10-31 22:15:23: Current Loop Iteration: 3, Remaining Variance: 2.57%, Number of Modes: 3"
-    ## [1] "2023-10-31 22:15:23: Current Loop Iteration: 4, Remaining Variance: 1.63%, Number of Modes: 4"
-    ## [1] "2023-10-31 22:15:23: Current Loop Iteration: 5, Remaining Variance: 1.34%, Number of Modes: 5"
-    ## [1] "2023-10-31 22:15:23: Current Loop Iteration: 6, Remaining Variance: 1.3%, Number of Modes: 6"
-    ## [1] "Concentration RMSE: 2132.57 n/cc"
-
-``` r
-# As there is only 1 data file for this set, we will flatten the list
-
-result <- flatten(result)
-```
-
-## Outputs
-
-The first element of result is a pass flag i.e. T or F
-
-``` r
-result$pass
-```
-
-    ## [1] TRUE
-
-The second is the plot which consists of three panels
-
-<img src="README_files/figure-gfm/unnamed-chunk-10-1.png" style="display: block; margin: auto;" />
-
-The remaining outputs are predicted data, the data used to plot curves,
-and evaluation parameters
-
-``` r
-head(result[[3]])
-```
-
-    ##      Dp Predicted dNdlogDp Predicted dN Actual dNdlogDp Actual dN
-    ## 1 10.16             453.91     6.301079        4952.512  68.74969
-    ## 2 10.49             529.09     7.117198        4985.419  67.06273
-    ## 3 10.82             612.31     8.465744        4903.316  67.79281
-    ## 4 11.17             709.75     9.777611        4740.169  65.30121
-    ## 5 11.53             820.21    11.251357        4507.124  61.82717
-    ## 6 11.90             944.94    12.899759        4250.884  58.03054
-    ##   Residual dNdlogDp Residual dN      Ratio
-    ## 1          4498.602    62.44861 0.09165247
-    ## 2          4456.329    59.94553 0.10612748
-    ## 3          4291.006    59.32707 0.12487672
-    ## 4          4030.419    55.52360 0.14973093
-    ## 5          3686.914    50.57581 0.18198080
-    ## 6          3305.944    45.13078 0.22229260
-
-``` r
-head(result[[4]])
-```
-
-    ##      Dp Mode 1 Mode 2 Mode 3 Mode 4 Mode 5 Mode 6 dNdlogDp
-    ## 1 10.00      0 420.26      0      0      0      0   420.26
-    ## 2 10.01      0 422.31      0      0      0      0   422.31
-    ## 3 10.02      0 424.37      0      0      0      0   424.37
-    ## 4 10.03      0 426.43      0      0      0      0   426.43
-    ## 5 10.04      0 428.50      0      0      0      0   428.50
-    ## 6 10.05      0 430.58      0      0      0      0   430.58
-
-``` r
-head(result[[5]])
-```
-
-    ##   Mode Label          N      GSD       Dpg       Max   Mode  Lower  Upper Width
-    ## 1     Mode 1  7709.7021 1.104493 317.61847 72801.737 311.03 249.85 451.56    13
-    ## 2     Mode 2 35219.1406 1.888153  71.61388 53335.797  69.18  13.51 105.61    62
-    ## 3     Mode 3  1299.9919 1.102360 150.90879 12544.712 147.69 126.94 172.59     8
-    ## 4     Mode 4   906.6612 1.069269 195.75567 12079.366 194.62 165.93 272.39    12
-    ## 5     Mode 5   715.3382 1.128914 499.31587  5631.458 497.83 430.34 830.76    13
-    ## 6     Mode 6   140.9658 1.042290 117.38486  2934.445 117.86  98.26 136.85     9
-    ##         BIC       RSS         TSS        R2 N T pval GSD T pval Dpg T pval
-    ## 1  276.9295 150254441  8174258916 0.9816186    5e-12    2.3e-22   2.16e-22
-    ## 2 1087.2011  88575112 19969539592 0.9955645    1e-65    1.1e-75   1.16e-73
-    ## 3  152.9817   4783910    93721539 0.9489561    8e-07    2.7e-12   1.13e-12
-    ## 4  262.9294 210120965   618259998 0.6601414    4e-03    3.1e-13   3.04e-13
-    ## 5  212.3369   1489699    53034863 0.9719109    2e-10    2.0e-19   5.82e-20
-    ## 6  179.0575  13928215    32875106 0.5763294    4e-02    2.1e-10   2.12e-10
-
-``` r
-result[[6]]
-```
-
-    ##      Pearson Correlation    RMSE      NRMSE dN RMSE   dN NRMSE Students T Test
-    ## [1,]              0.9939 2132.57 0.02935411   37.15 0.02613263          0.8524
-    ##      Chi-Squared
-    ## [1,]      0.2391
-
-## Example 2 - Storm Peak Laboratory
-
-    ## [1] "Log Path: ~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log//multimodal20220323020341_20250825123742.log"
-    ## [1] "Current Dataset Time: 2022-03-23 06:03:41 UTC"
-    ## [1] "Dataset sampling frequency is 5 min"
-    ## [1] "2022-03-23 06:03:41: Error, please modify lower and upper limits to accommadate data set"
-
-Notice the failure message? This is because the dataset begins for bin
-diameter 9.14. Now we can retry with adjusted limits.
-
-    ## [1] "Log Path: ~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log//multimodal20220323020341_20250825123742.log"
-    ## [1] "Current Dataset Time: 2022-03-23 06:03:41 UTC"
-    ## [1] "Dataset sampling frequency is 5 min"
-    ## [1] "2022-03-23 06:03:41: Current Loop Iteration: 1, Remaining Variance: 1.11%, Number of Modes: 1"
-    ## [1] "2022-03-23 06:03:41: Current Loop Iteration: 2, Remaining Variance: 0.82%, Number of Modes: 2"
-    ## [1] "Concentration RMSE: 354.11 n/cc"
-
-For this file there is a NPF event, but currently the averaging across
-the entire day removes all temporal variation. We will instead select
-times between 07:00 and 15:00 and use an hourly frequency.
-
-    ## [1] "Log Path: ~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log//multimodal20220323070340_20250825123743.log"
-
-    ## $`2022-03-23 11:00:00`
-
-<img src="README_files/figure-gfm/unnamed-chunk-14-1.png" style="display: block; margin: auto;" />
-
-    ## 
-    ## $`2022-03-23 12:00:00`
-
-<img src="README_files/figure-gfm/unnamed-chunk-14-2.png" style="display: block; margin: auto;" />
-
-    ## 
-    ## $`2022-03-23 13:00:00`
-
-<img src="README_files/figure-gfm/unnamed-chunk-14-3.png" style="display: block; margin: auto;" />
-
-    ## 
-    ## $`2022-03-23 14:00:00`
-
-<img src="README_files/figure-gfm/unnamed-chunk-14-4.png" style="display: block; margin: auto;" />
-
-    ## 
-    ## $`2022-03-23 15:00:00`
-
-<img src="README_files/figure-gfm/unnamed-chunk-14-5.png" style="display: block; margin: auto;" />
-
-    ## 
-    ## $`2022-03-23 16:00:00`
-
-<img src="README_files/figure-gfm/unnamed-chunk-14-6.png" style="display: block; margin: auto;" />
-
-    ## 
-    ## $`2022-03-23 17:00:00`
-
-<img src="README_files/figure-gfm/unnamed-chunk-14-7.png" style="display: block; margin: auto;" />
-
-    ## 
-    ## $`2022-03-23 18:00:00`
-
-<img src="README_files/figure-gfm/unnamed-chunk-14-8.png" style="display: block; margin: auto;" />
-
-    ## 
-    ## $`2022-03-23 19:00:00`
-
-<img src="README_files/figure-gfm/unnamed-chunk-14-9.png" style="display: block; margin: auto;" />
-
-Note - for higher resolution scans, the variation within the scan may be
-too high to capture. The following is an example.
-
-    ## [1] "Log Path: ~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log//multimodal20220323100340_20250825123755.log"
-
-    ## $`2022-03-23 14:05:00`
-
-    ## Warning: ggrepel: 1 unlabeled data points (too many overlaps). Consider
-    ## increasing max.overlaps
-
-<img src="README_files/figure-gfm/unnamed-chunk-15-1.png" style="display: block; margin: auto;" />

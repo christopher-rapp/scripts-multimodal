@@ -1,5 +1,5 @@
 ---
-title: "Supplement of Technical Note: Curve fitting algorithm for multimodal particle size distributions – a theoretical basis"
+title: "Technical Note: Curve fitting algorithm for multimodal particle size distributions – a theoretical basis"
 date: "2025-08-25"
 output:
   github_document:
@@ -65,7 +65,7 @@ library(ncdf4)
 
 To download the example data visit
 
-<https://github.com/christopher-rapp/scripts-multimodal/tree/main/examples>
+<https://github.com/christopher-rapp/scripts-multimodal/tree/main/example_data>
 
 ```{r}
 log.path = '~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log/'
@@ -78,6 +78,8 @@ import.path.NAS = '~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/examp
 
 # Formatting Data
 
+Raw view of data format is appended to the bottom of this document
+
 ## Brechtel Manufacturing Inc. (BMI) Data
 
 ```{r}
@@ -86,8 +88,6 @@ BMI.data.ls <- readPSD_BMI(import.path.BMI, tz = "US/Eastern")
 
 # Read functions export data as a list to account for multiple files in a directory
 dataPSD.BMI <- BMI.data.ls[[1]]
-
-head(dataPSD.BMI)
 ```
 
 ## TSI Data
@@ -100,8 +100,6 @@ TSI.data.ls <- readPSD_TSI(import.path.TSI, tz = "US/Mountain")
 
 # Read functions export data as a list to account for multiple files in a directory
 dataPSD.TSI <- TSI.data.ls[[1]]
-
-head(dataPSD.TSI)
 ```
 
 ## netCDF Data
@@ -118,8 +116,6 @@ NC.data.ls <- readPSD_NC(import.path.NC)
 
 # Read functions export data as a list to account for multiple files in a directory
 dataPSD.NC <- NC.data.ls[[1]]
-
-head(dataPSD.NC)
 ```
 
 ## NASA-AMES Data
@@ -134,9 +130,6 @@ NAS.data.ls <- readPSD_NAS(import.path.NAS)
 
 # Read functions export data as a list to account for multiple files in a directory
 dataPSD.NAS <- NAS.data.ls[[1]]
-
-head(dataPSD.NAS)
-
 ```
 
 # Running multimodal
@@ -148,7 +141,8 @@ Let's run multimodal on an example dataset using a Brechtel SEMS (Model 2002). N
 ```{r}
 
 # Frequency is null here because I already grouped data above
-# I've also removed the argument for the log.path which will default to a temporary directory created by R which is deleted upon exiting an R session
+# I've also removed the argument for the log.path which will default
+# to a temporary directory created by R which is deleted upon exiting an R session
 result <- multimodal.fitting(dataPSD.BMI,
                              frequency = NULL,
                              labeling = T,
@@ -274,4 +268,14 @@ tmp <- multimodal.fitting(data,
                           verbose = F)
 
 map(tmp, 2)
+```
+
+```{r}
+head(dataPSD.BMI)
+
+head(dataPSD.TSI)
+
+head(dataPSD.NAS)
+
+head(dataPSD.NC)
 ```
