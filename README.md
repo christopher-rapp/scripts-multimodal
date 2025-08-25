@@ -6,7 +6,6 @@ date: "2025-08-25"
 output:
   html_document:
     keep_md: true
-  pdf_document: default
 linkcolor: blue
 ---
 
@@ -32,22 +31,9 @@ Source code for SMPS read functions are housed here <https://github.com/christop
 
 # Setup
 
-
-
 ## Retrieve Read Functions
 
 
-``` r
-devtools::source_url("https://raw.githubusercontent.com/christopher-rapp/scripts-multimodal/refs/heads/main/multimodal.R")
-
-devtools::source_url("https://raw.githubusercontent.com/christopher-rapp/scripts-multimodal/refs/heads/main/readPSD_BMI.R")
-
-devtools::source_url("https://raw.githubusercontent.com/christopher-rapp/scripts-multimodal/refs/heads/main/readPSD_NAS.R")
-
-devtools::source_url("https://raw.githubusercontent.com/christopher-rapp/scripts-multimodal/refs/heads/main/readPSD_NC.R")
-
-devtools::source_url("https://raw.githubusercontent.com/christopher-rapp/scripts-multimodal/refs/heads/main/readPSD_TSI.R")
-```
 
 ## Import Libraries
 
@@ -67,7 +53,9 @@ library(ncdf4)
 
 ## User Paths
 
-These must be changed if trying with your own data!
+To download the example data visit
+
+<https://github.com/christopher-rapp/scripts-multimodal/tree/main/examples>
 
 
 ``` r
@@ -646,7 +634,7 @@ result <- multimodal.fitting(dataPSD.BMI,
 ```
 
 ```
-## [1] "Log Path: /var/folders/2j/rmf9p1l50wg904hz8qkpvc4m0000gn/T//RtmpwtucT2/multimodal20231031181523_20250825120331.log"
+## [1] "Log Path: /var/folders/2j/rmf9p1l50wg904hz8qkpvc4m0000gn/T//RtmpCskXGC/multimodal20231031181523_20250825122533.log"
 ## [1] "Current Dataset Time: 2023-10-31 22:15:23 UTC"
 ## [1] "Dataset sampling frequency is 2.4 min"
 ## [1] "2023-10-31 22:15:23: Current Loop Iteration: 1, Remaining Variance: 94.93%, Number of Modes: 1"
@@ -679,7 +667,7 @@ result$pass
 
 The second is the plot which consists of three panels
 
-<img src="README_files/figure-html/unnamed-chunk-11-1.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-html/unnamed-chunk-10-1.png" style="display: block; margin: auto;" />
 
 The remaining outputs are predicted data, the data used to plot curves, and evaluation parameters
 
@@ -755,7 +743,7 @@ result[[6]]
 
 
 ```
-## [1] "Log Path: ~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log//multimodal20220323020341_20250825120334.log"
+## [1] "Log Path: ~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log//multimodal20220323020341_20250825122536.log"
 ## [1] "Current Dataset Time: 2022-03-23 06:03:41 UTC"
 ## [1] "Dataset sampling frequency is 5 min"
 ## [1] "2022-03-23 06:03:41: Error, please modify lower and upper limits to accommadate data set"
@@ -765,7 +753,7 @@ Notice the failure message? This is because the dataset begins for bin diameter 
 
 
 ```
-## [1] "Log Path: ~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log//multimodal20220323020341_20250825120334.log"
+## [1] "Log Path: ~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log//multimodal20220323020341_20250825122536.log"
 ## [1] "Current Dataset Time: 2022-03-23 06:03:41 UTC"
 ## [1] "Dataset sampling frequency is 5 min"
 ## [1] "2022-03-23 06:03:41: Current Loop Iteration: 1, Remaining Variance: 1.11%, Number of Modes: 1"
@@ -777,76 +765,76 @@ For this file there is a NPF event, but currently the averaging across the entir
 
 
 ```
-## [1] "Log Path: ~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log//multimodal20220323070340_20250825120335.log"
+## [1] "Log Path: ~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log//multimodal20220323070340_20250825122536.log"
 ```
 
 ```
 ## $`2022-03-23 11:00:00`
 ```
 
-<img src="README_files/figure-html/unnamed-chunk-15-1.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-html/unnamed-chunk-14-1.png" style="display: block; margin: auto;" />
 
 ```
 ## 
 ## $`2022-03-23 12:00:00`
 ```
 
-<img src="README_files/figure-html/unnamed-chunk-15-2.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-html/unnamed-chunk-14-2.png" style="display: block; margin: auto;" />
 
 ```
 ## 
 ## $`2022-03-23 13:00:00`
 ```
 
-<img src="README_files/figure-html/unnamed-chunk-15-3.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-html/unnamed-chunk-14-3.png" style="display: block; margin: auto;" />
 
 ```
 ## 
 ## $`2022-03-23 14:00:00`
 ```
 
-<img src="README_files/figure-html/unnamed-chunk-15-4.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-html/unnamed-chunk-14-4.png" style="display: block; margin: auto;" />
 
 ```
 ## 
 ## $`2022-03-23 15:00:00`
 ```
 
-<img src="README_files/figure-html/unnamed-chunk-15-5.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-html/unnamed-chunk-14-5.png" style="display: block; margin: auto;" />
 
 ```
 ## 
 ## $`2022-03-23 16:00:00`
 ```
 
-<img src="README_files/figure-html/unnamed-chunk-15-6.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-html/unnamed-chunk-14-6.png" style="display: block; margin: auto;" />
 
 ```
 ## 
 ## $`2022-03-23 17:00:00`
 ```
 
-<img src="README_files/figure-html/unnamed-chunk-15-7.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-html/unnamed-chunk-14-7.png" style="display: block; margin: auto;" />
 
 ```
 ## 
 ## $`2022-03-23 18:00:00`
 ```
 
-<img src="README_files/figure-html/unnamed-chunk-15-8.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-html/unnamed-chunk-14-8.png" style="display: block; margin: auto;" />
 
 ```
 ## 
 ## $`2022-03-23 19:00:00`
 ```
 
-<img src="README_files/figure-html/unnamed-chunk-15-9.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-html/unnamed-chunk-14-9.png" style="display: block; margin: auto;" />
 
 Note - for higher resolution scans, the variation within the scan may be too high to capture. The following is an example.
 
 
 ```
-## [1] "Log Path: ~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log//multimodal20220323100340_20250825120347.log"
+## [1] "Log Path: ~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log//multimodal20220323100340_20250825122549.log"
 ```
 
 ```
@@ -858,4 +846,4 @@ Note - for higher resolution scans, the variation within the scan may be too hig
 ## increasing max.overlaps
 ```
 
-<img src="README_files/figure-html/unnamed-chunk-16-1.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-html/unnamed-chunk-15-1.png" style="display: block; margin: auto;" />
