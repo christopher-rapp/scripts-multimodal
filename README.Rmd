@@ -1,21 +1,40 @@
 ---
 title: "Supplement"
-subtitle: "Technical Note: Curve fitting algorithm for multimodal particle size distributions – a theoretical basis"
-author: Christopher Rapp
-date: "2025-08-08"
-output: 
+subtitle: 'Technical Note: Curve fitting algorithm for multimodal particle size distributions
+  – a theoretical basis'
+date: "2025-08-25"
+output:
+  pdf_document: default
   html_document:
     keep_md: true
 linkcolor: blue
 ---
 
+------------------------------------------------------------------------
+
+Christopher N. Rapp^1^, Sining Niu^2^, Yue Zhang^2^, A. Gannet Hallar^3^, Fred J. Brechtel^4^, and Daniel J. Cziczo^1^
+
+^1^Department of Earth, Atmospheric, and Planetary Sciences, Purdue University, West Lafayette, Indiana, 47906-2051, USA
+
+^2^Department of Atmospheric Sciences, Texas A&M University, College Station, Texas, 77843-3150, USA
+
+^3^Department of Atmospheric Sciences, University of Utah, Salt Lake City, Utah, 84112-0102, USA
+
+^4^Brechtel Manufacturing Incorporated, Hayward, California, 94544, USA
+
+*Correspondence to*: Christopher N. Rapp (christopherrapp\@icloud.com)
+
+------------------------------------------------------------------------
+
 Source code for SMPS read functions are housed here <https://github.com/christopher-rapp/scripts-multimodal.git>
+
+------------------------------------------------------------------------
 
 # Setup
 
 ## Retrieve Read Functions
 
-```{r, echo=T, message=FALSE}
+```{r, echo=FALSE, message=FALSE}
 
 devtools::source_url("https://raw.githubusercontent.com/christopher-rapp/scripts-multimodal/refs/heads/main/multimodal.R")
 

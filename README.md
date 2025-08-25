@@ -1,17 +1,38 @@
 ---
 title: "Supplement"
-subtitle: "Technical Note: Curve fitting algorithm for multimodal particle size distributions – a theoretical basis"
-author: Christopher Rapp
-date: "2025-08-08"
-output: 
+subtitle: 'Technical Note: Curve fitting algorithm for multimodal particle size distributions
+  – a theoretical basis'
+date: "2025-08-25"
+output:
   html_document:
     keep_md: true
+  pdf_document: default
 linkcolor: blue
 ---
 
+------------------------------------------------------------------------
+
+Christopher N. Rapp^1^, Sining Niu^2^, Yue Zhang^2^, A. Gannet Hallar^3^, Fred J. Brechtel^4^, and Daniel J. Cziczo^1^
+
+^1^Department of Earth, Atmospheric, and Planetary Sciences, Purdue University, West Lafayette, Indiana, 47906-2051, USA
+
+^2^Department of Atmospheric Sciences, Texas A&M University, College Station, Texas, 77843-3150, USA
+
+^3^Department of Atmospheric Sciences, University of Utah, Salt Lake City, Utah, 84112-0102, USA
+
+^4^Brechtel Manufacturing Incorporated, Hayward, California, 94544, USA
+
+*Correspondence to*: Christopher N. Rapp (christopherrapp\@icloud.com)
+
+------------------------------------------------------------------------
+
 Source code for SMPS read functions are housed here <https://github.com/christopher-rapp/scripts-multimodal.git>
 
+------------------------------------------------------------------------
+
 # Setup
+
+
 
 ## Retrieve Read Functions
 
@@ -625,7 +646,7 @@ result <- multimodal.fitting(dataPSD.BMI,
 ```
 
 ```
-## [1] "Log Path: /var/folders/2j/rmf9p1l50wg904hz8qkpvc4m0000gn/T//RtmpECsfQs/multimodal20231031181523_20250808184200.log"
+## [1] "Log Path: /var/folders/2j/rmf9p1l50wg904hz8qkpvc4m0000gn/T//RtmpwtucT2/multimodal20231031181523_20250825120331.log"
 ## [1] "Current Dataset Time: 2023-10-31 22:15:23 UTC"
 ## [1] "Dataset sampling frequency is 2.4 min"
 ## [1] "2023-10-31 22:15:23: Current Loop Iteration: 1, Remaining Variance: 94.93%, Number of Modes: 1"
@@ -658,7 +679,7 @@ result$pass
 
 The second is the plot which consists of three panels
 
-<img src="README_files/figure-html/unnamed-chunk-10-1.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-html/unnamed-chunk-11-1.png" style="display: block; margin: auto;" />
 
 The remaining outputs are predicted data, the data used to plot curves, and evaluation parameters
 
@@ -734,7 +755,7 @@ result[[6]]
 
 
 ```
-## [1] "Log Path: ~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log//multimodal20220323020341_20250808184203.log"
+## [1] "Log Path: ~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log//multimodal20220323020341_20250825120334.log"
 ## [1] "Current Dataset Time: 2022-03-23 06:03:41 UTC"
 ## [1] "Dataset sampling frequency is 5 min"
 ## [1] "2022-03-23 06:03:41: Error, please modify lower and upper limits to accommadate data set"
@@ -744,7 +765,7 @@ Notice the failure message? This is because the dataset begins for bin diameter 
 
 
 ```
-## [1] "Log Path: ~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log//multimodal20220323020341_20250808184203.log"
+## [1] "Log Path: ~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log//multimodal20220323020341_20250825120334.log"
 ## [1] "Current Dataset Time: 2022-03-23 06:03:41 UTC"
 ## [1] "Dataset sampling frequency is 5 min"
 ## [1] "2022-03-23 06:03:41: Current Loop Iteration: 1, Remaining Variance: 1.11%, Number of Modes: 1"
@@ -756,76 +777,76 @@ For this file there is a NPF event, but currently the averaging across the entir
 
 
 ```
-## [1] "Log Path: ~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log//multimodal20220323070340_20250808184204.log"
+## [1] "Log Path: ~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log//multimodal20220323070340_20250825120335.log"
 ```
 
 ```
 ## $`2022-03-23 11:00:00`
 ```
 
-<img src="README_files/figure-html/unnamed-chunk-14-1.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-html/unnamed-chunk-15-1.png" style="display: block; margin: auto;" />
 
 ```
 ## 
 ## $`2022-03-23 12:00:00`
 ```
 
-<img src="README_files/figure-html/unnamed-chunk-14-2.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-html/unnamed-chunk-15-2.png" style="display: block; margin: auto;" />
 
 ```
 ## 
 ## $`2022-03-23 13:00:00`
 ```
 
-<img src="README_files/figure-html/unnamed-chunk-14-3.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-html/unnamed-chunk-15-3.png" style="display: block; margin: auto;" />
 
 ```
 ## 
 ## $`2022-03-23 14:00:00`
 ```
 
-<img src="README_files/figure-html/unnamed-chunk-14-4.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-html/unnamed-chunk-15-4.png" style="display: block; margin: auto;" />
 
 ```
 ## 
 ## $`2022-03-23 15:00:00`
 ```
 
-<img src="README_files/figure-html/unnamed-chunk-14-5.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-html/unnamed-chunk-15-5.png" style="display: block; margin: auto;" />
 
 ```
 ## 
 ## $`2022-03-23 16:00:00`
 ```
 
-<img src="README_files/figure-html/unnamed-chunk-14-6.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-html/unnamed-chunk-15-6.png" style="display: block; margin: auto;" />
 
 ```
 ## 
 ## $`2022-03-23 17:00:00`
 ```
 
-<img src="README_files/figure-html/unnamed-chunk-14-7.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-html/unnamed-chunk-15-7.png" style="display: block; margin: auto;" />
 
 ```
 ## 
 ## $`2022-03-23 18:00:00`
 ```
 
-<img src="README_files/figure-html/unnamed-chunk-14-8.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-html/unnamed-chunk-15-8.png" style="display: block; margin: auto;" />
 
 ```
 ## 
 ## $`2022-03-23 19:00:00`
 ```
 
-<img src="README_files/figure-html/unnamed-chunk-14-9.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-html/unnamed-chunk-15-9.png" style="display: block; margin: auto;" />
 
 Note - for higher resolution scans, the variation within the scan may be too high to capture. The following is an example.
 
 
 ```
-## [1] "Log Path: ~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log//multimodal20220323100340_20250808184216.log"
+## [1] "Log Path: ~/Library/CloudStorage/Box-Box/Multimodal Curve Fitting/log//multimodal20220323100340_20250825120347.log"
 ```
 
 ```
@@ -837,4 +858,4 @@ Note - for higher resolution scans, the variation within the scan may be too hig
 ## increasing max.overlaps
 ```
 
-<img src="README_files/figure-html/unnamed-chunk-15-1.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-html/unnamed-chunk-16-1.png" style="display: block; margin: auto;" />
