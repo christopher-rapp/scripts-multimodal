@@ -4,14 +4,14 @@ subtitle: 'Technical Note: Curve fitting algorithm for multimodal particle size 
   – a theoretical basis'
 date: "2025-08-25"
 output:
-  html_document:
-    keep_md: true
+  github_document:
+    toc: true
 linkcolor: blue
 ---
 
 ------------------------------------------------------------------------
 
-Christopher N. Rapp^1^, Sining Niu^2^, Yue Zhang^2^, A. Gannet Hallar^3^, Fred J. Brechtel^4^, and Daniel J. Cziczo^1^
+Christopher N. Rapp<sup>1</sup>, Sining Niu^2^, Yue Zhang^2^, A. Gannet Hallar^3^, Fred J. Brechtel^4^, and Daniel J. Cziczo^1^
 
 ^1^Department of Earth, Atmospheric, and Planetary Sciences, Purdue University, West Lafayette, Indiana, 47906-2051, USA
 
